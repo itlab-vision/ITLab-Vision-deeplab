@@ -62,27 +62,16 @@ Check [FAQ](http://ccvl.stat.ucla.edu/deeplab_faq/) if you have some problems wh
 Suppose the codes are located at deeplab/code
 
 1. mkdir deeplab/exper (Create a folder for experiments)
-
 2. mkdir deeplab/exper/voc12 (Create a folder for your specific experiment. Let's take PASCAL VOC 2012 for example.)
-
 3. Create folders for config files and so on.
-
-mkdir deeplab/exper/voc12/config  (where network config files are saved.)
-mkdir deeplab/exper/voc12/features  (where the computed features will be saved (when train on train))
-mkdir deeplab/exper/voc12/features2 (where the computed features will be saved (when train on trainval))
-mkdir deeplab/exper/voc12/list (where you save the train, val, and test file lists)
-mkdir deeplab/exper/voc12/log (where the training/test logs will be saved)
-mkdir deeplab/exper/voc12/model (where the trained models will be saved)
-mkdir deeplab/exper/voc12/res (where the evaluation results will be saved)
-
+    1. mkdir deeplab/exper/voc12/config  (where network config files are saved.)
+    2. mkdir deeplab/exper/voc12/features  (where the computed features will be saved (when train on train))
+    3. mkdir deeplab/exper/voc12/features2 (where the computed features will be saved (when train on trainval))
+    4. mkdir deeplab/exper/voc12/list (where you save the train, val, and test file lists)
+    5. mkdir deeplab/exper/voc12/log (where the training/test logs will be saved)
+    6. mkdir deeplab/exper/voc12/model (where the trained models will be saved)
+    7. mkdir deeplab/exper/voc12/res (where the evaluation results will be saved)
 4. mkdir deeplab/exper/voc12/config/deeplab_largeFOV (test your own network. Create a folder under config. For example, deeplab_largeFOV is the network you want to experiment with. Add your train.prototxt and test.prototxt in that folder (you can check some provided examples for reference).)
-
-5. Set up your init.caffemodel at deeplab/exper/voc12/model/deeplab_largeFOV. You may want to soft link init.caffemodel to the modified VGG-16 net.
-
-For example, run "ln -s vgg16.caffemodel init.caffemodel" at voc12/model/deeplab_largeFOV.
-
-6. Modify the provided script, run_pascal.sh, for experiments. You should change the paths according to your setting. For example, you should specify where the caffe is by changing CAFFE_DIR.
-
-Note You may need to modify sub.sed, if you want to replace some variables with your desired values in train.prototxt or test.prototxt.
-
+5. Set up your init.caffemodel at deeplab/exper/voc12/model/deeplab_largeFOV. You may want to soft link init.caffemodel to the modified VGG-16 net. For example, run "ln -s vgg16.caffemodel init.caffemodel" at voc12/model/deeplab_largeFOV.
+6. Modify the provided script, run_pascal.sh, for experiments. You should change the paths according to your setting. For example, you should specify where the caffe is by changing CAFFE_DIR. Note You may need to modify sub.sed, if you want to replace some variables with your desired values in train.prototxt or test.prototxt.
 7. The computed features are saved at folders features or features2, and you can run provided MATLAB scripts to evaluate the results (e.g., check the script at code/matlab/my_script/EvalSegResults).
