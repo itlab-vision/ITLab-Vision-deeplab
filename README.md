@@ -59,6 +59,8 @@ Check [FAQ](http://ccvl.stat.ucla.edu/deeplab_faq/) if you have some problems wh
 
 ### How to run DeepLab
 
+There are several variants of DeepLab. To begin with, we suggest DeepLab-LargeFOV, which has good performance and faster training time.
+
 Suppose the codes are located at deeplab/code
 
 1. mkdir deeplab/exper (Create a folder for experiments)
