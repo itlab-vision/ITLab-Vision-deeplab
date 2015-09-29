@@ -77,3 +77,7 @@ Suppose the codes are located at deeplab/code
 5. Set up your init.caffemodel at deeplab/exper/voc12/model/deeplab_largeFOV. You may want to soft link init.caffemodel to the modified VGG-16 net. For example, run "ln -s vgg16.caffemodel init.caffemodel" at voc12/model/deeplab_largeFOV.
 6. Modify the provided script, run_pascal.sh, for experiments. You should change the paths according to your setting. For example, you should specify where the caffe is by changing CAFFE_DIR. Note You may need to modify sub.sed, if you want to replace some variables with your desired values in train.prototxt or test.prototxt.
 7. The computed features are saved at folders features or features2, and you can run provided MATLAB scripts to evaluate the results (e.g., check the script at code/matlab/my_script/EvalSegResults).
+
+### Python
+
+Seyed Ali Mousavi has implemented a python version of run_pascal.sh. If you are more familiar with Python, you may want to take a look at [this](https://github.com/TheLegendAli/CCVL). 
