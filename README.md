@@ -80,4 +80,4 @@ Suppose the codes are located at deeplab/code
 
 ### Python
 
-Seyed Ali Mousavi has implemented a python version of run_pascal.sh. If you are more familiar with Python, you may want to take a look at [this](https://github.com/TheLegendAli/CCVL). 
+Seyed Ali Mousavi has implemented a python version of run_pascal.sh (Thanks, Ali!). If you are more familiar with Python, you may want to take a look at [this](https://github.com/TheLegendAli/CCVL). 
