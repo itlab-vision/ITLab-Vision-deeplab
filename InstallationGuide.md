@@ -17,7 +17,7 @@ instructions to install dependencies and Deeplab itself:
 
 ###BOOST
 From Sources:
-```
+```bash
 wget http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.gz
 tar -xzvf boost_1_54_0.tar.gz
 cd boost_1_54_0
@@ -26,13 +26,13 @@ cd boost_1_54_0
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libboost-all-dev
 ```
 
 ###GLOG
 From Sources:
-```
+```bash
 wget https://google-glog.googlecode.com/files/glog-0.3.3.tar.gz
 tar -xzvf glog-0.3.3.tar.gz
 cd glog-0.3.3
@@ -42,13 +42,13 @@ make install DESTDIR=/home/<username>/Documents/install
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libgoogle-glog-dev
 ```
 
 ###GFLAGS
 From Sources:
-```
+```bash
 git clone https://github.com/gflags/gflags
 mv gflags gflags-2.1.2
 mkdir gflags-2.1.2-build
@@ -59,7 +59,7 @@ make install
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libgflags-dev
 ```
 
@@ -67,7 +67,7 @@ sudo apt-get install libgflags-dev
 From Sources:
 1. Download [ATLAS](http://sourceforge.net/projects/math-atlas/files/Stable/3.10.2/atlas3.10.2.tar.bz2/download)
 2. Download [LAPACK](http://www.netlib.org/lapack/#_lapack_version_3_4_1)
-```
+```bash
 tar -zxvf lapack-3.4.1.tgz
 cd lapack-3.4.1
 cp INSTALL/make.inc.gfortran make.inc
@@ -89,13 +89,13 @@ cd atlas_build
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libatlas-base-dev
 ```
 
 ###HDF5 
 [From Sources](https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/release_docs/INSTALL):
-```
+```bash
 wget http://www.hdfgroup.org/ftp/HDF5/current/src/CMake/hdf5-1.8.15-patch1-CMake.tar.gz
 tar -zxvf hdf5-1.8.15-patch1-CMake.tar.gz
 cd HDF518CMake/hdf5-1.8.15-patch1
@@ -106,39 +106,39 @@ make install
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libhdf5-serial-dev
 ```
 
 ###LEVELDB
 From Sources:
-```
+```bash
 git clone https://github.com/google/leveldb
 cd leveldb
 make
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libleveldb-dev
 ```
 
 ###LMDB
 From Sources:
-```
+```bash
 git clone https://github.com/LMDB/lmdb
 cd lmdb/libraries/liblmdb
 make
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install liblmdb-dev
 ```
 
 ###SNAPPY
 From Sources:
-```
+```bash
 wget https://snappy.googlecode.com/files/snappy-1.1.1.tar.gz
 tar -xzvf snappy-1.1.1.tar.gz
 cd snappy-1.1.1
@@ -148,13 +148,13 @@ make install
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libsnappy-dev
 ```
 
 ###OPENCV
 [From Sources](http://docs.opencv.org/3.0-last-rst/doc/tutorials/introduction/linux_install/linux_install.html):
-```
+```bash
 wget https://github.com/Itseez/opencv/archive/2.4.11.zip
 unzip 2.4.11
 cd opencv-2.4.11
@@ -167,13 +167,13 @@ make install
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libopencv-dev
 ```
 
 ###PROTOBUF
 [From Sources](https://github.com/google/protobuf):
-```
+```bash
 git clone https://github.com/google/protobuf
 cd protobuf
 ./autogen.sh
@@ -184,12 +184,12 @@ export PATH=$PATH:/home/<username>/Documents/install/bin
 ```
 
 From Packages:
-```
+```bash
 sudo apt-get install libprotobuf-dev protobuf-compiler
 ```
 
 ###MATIO
-```
+```bash
 wget http://sourceforge.net/projects/matio/files/latest/download
 tar -zxvf matio-1.5.2.tar.gz
 cd matio-1.5.2
@@ -202,7 +202,7 @@ make install
 ```
 
 ###DEEPLAB
-```
+```bash
 git clone https://bitbucket.org/deeplab/deeplab-public.git
 mkdir deeplab-public-build
 cd deeplab-public-build
