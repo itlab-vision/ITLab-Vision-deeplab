@@ -53,7 +53,7 @@ git clone https://github.com/gflags/gflags
 mv gflags gflags-2.1.2
 mkdir gflags-2.1.2-build
 cd gflags-2.1.2-build
-cmake -DCMAKE_INSTALL_PREFIX=../../install -g make ../gflags-2.1.2
+cmake -DCMAKE_INSTALL_PREFIX=/home/<username>/Documents/install -g make ../gflags-2.1.2
 make
 make install
 ```
@@ -65,14 +65,13 @@ sudo apt-get install libgflags-dev
 
 ###ATLAS
 From Sources:
+1. Download [ATLAS](http://sourceforge.net/projects/math-atlas/files/Stable/3.10.2/atlas3.10.2.tar.bz2/download)
+2. Download [LAPACK](http://www.netlib.org/lapack/#_lapack_version_3_4_1)
 ```
-Скачать ATLAS http://sourceforge.net/projects/math-atlas/files/Stable/3.10.2/atlas3.10.2.tar.bz2/download
-Скачать LAPACK http://www.netlib.org/lapack/#_lapack_version_3_4_1
-
 tar -zxvf lapack-3.4.1.tgz
 cd lapack-3.4.1
 cp INSTALL/make.inc.gfortran make.inc
-// в файле make.inc
+// correct make.inc:
 // 1. OPTS = -O2 -fPIC
 // 2. NOOPT = -O0 -fPIC
 cd SRC
@@ -82,11 +81,11 @@ tar -xvf atlas3.10.2.tar.bz2
 mv ATLAS ATLAS-3.10.2
 mkdir atlas_build
 cd atlas_build
-// вызвать cpufreq-set -g performance (или cpufreq-selector -g performance),
-// если конфигурирование было прервано с ошибкой
+// call cpufreq-set -g performance (or cpufreq-selector -g performance),
+// if configure procedure failed
 ../ATLAS-3.10.2/configure -b 64 \
-                                          --prefix=../../../install \
-                                          --with-netlib-lapack-tarfile=../../lapack-3.4.1.tgz
+      --prefix=../../../install \
+      --with-netlib-lapack-tarfile=../../lapack-3.4.1.tgz
 ```
 
 From Packages:
@@ -95,12 +94,12 @@ sudo apt-get install libatlas-base-dev
 ```
 
 ###HDF5 
-[From Sources]((https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/release_docs/INSTALL)):
+[From Sources](https://www.hdfgroup.org/ftp/HDF5/current/src/unpacked/release_docs/INSTALL):
 ```
 wget http://www.hdfgroup.org/ftp/HDF5/current/src/CMake/hdf5-1.8.15-patch1-CMake.tar.gz
 tar -zxvf hdf5-1.8.15-patch1-CMake.tar.gz
 cd HDF518CMake/hdf5-1.8.15-patch1
-./configure --prefix=/home/<user>/Documents/install/hdf5/ --enable-build-all=yes --enable-fortran=yes --enable-cxx=yes
+./configure --prefix=/home/<username>/Documents/install/hdf5/ --enable-build-all=yes --enable-fortran=yes --enable-cxx=yes
 make
 make check
 make install
@@ -162,7 +161,7 @@ cd opencv-2.4.11
 mkdir build
 cd build
 cmake -D CMAKE_BUILD_TYPE=Release \
-           -D CMAKE_INSTALL_PREFIX=/home/<username>/Documents/install ..
+      -D CMAKE_INSTALL_PREFIX=/home/<username>/Documents/install ..
 make
 make install
 ```
@@ -194,10 +193,9 @@ sudo apt-get install libprotobuf-dev protobuf-compiler
 wget http://sourceforge.net/projects/matio/files/latest/download
 tar -zxvf matio-1.5.2.tar.gz
 cd matio-1.5.2
-// при конфигурировании могут возникнуть проблемы с относительным путем до библиотеки HDF5
-// решение: использовать абсолютный путь
+// if configure procedure failed with relative path to HDF5 try absolute path
  ./configure --with-hdf5=/home/<username>/Documents/install../HDF518CMake/hdf5-1.8.15-patch1/hdf5 \
-                  --prefix=/home/<username>/Documents/dependencies/matio-1.5.2/matio
+             --prefix=/home/<username>/Documents/dependencies/matio-1.5.2/matio
 make
 make check
 make install
@@ -209,31 +207,28 @@ git clone https://bitbucket.org/deeplab/deeplab-public.git
 mkdir deeplab-public-build
 cd deeplab-public-build
 export PATH=$PATH:/home/<username>/Documents/install/bin
-// требуется предварительное изменение CMakeLists.txt, т.к. в коде явно подключается
-// библиотека matio (!не опционально), см. примечания с деталями вносимых изменений
-// командная строка cmake находится в скрипте 	
 
-cmake -DGLOG_INCLUDE_DIR=../../install/include/glog \
-      -DGFLAGS_INCLUDE_DIR=../../install/include/gflags \
-      -DAtlas_CBLAS_INCLUDE_DIR=../../dependencies/ATLAS-3.10.2/include \
-      -DAtlas_CLAPACK_INCLUDE_DIR=../../dependencies/ATLAS-3.10.2-build/include \
-      -DLEVELDB_INCLUDE=../../dependencies/leveldb/include \
-      -DSNAPPY_INCLUDE_DIR=../../dependencies/snappy-1.1.1/snappy-1.1.1/include \
-      -DLMDB_INCLUDE_DIR=../../dependencies/lmdb/libraries/liblmdb \
-      -DPROTOBUF_INCLUDE_DIR=../../install/include/google/protobuf \
-      -DMATIO_INCLUDE_DIR=../../dependencies/matio-1.5.2/matio/include \
-      -DBoost_INCLUDE_DIR=../../install/include/boost \
-      -DGLOG_LIBRARY=../../install/lib/libglog.a \
-      -DGFLAGS_LIBRARY=../../install/lib/libgflags.a \
-      -DAtlas_CBLAS_LIBRARY=../../dependencies/ATLAS-3.10.2-build/lib/libcblas.a \
-      -DAtlas_BLAS_LIBRARY=../../dependencies/ATLAS-3.10.2-build/lib/libatlas.a \
-      -DAtlas_LAPACK_LIBRARY=../../dependencies/ATLAS-3.10.2-build/lib/liblapack.a \
-      -DLEVELDB_LIBS=../../dependencies/leveldb/libleveldb.a \
-      -DSNAPPY_LIBS=../../dependencies/snappy-1.1.1/snappy-1.1.1/lib/libsnappy.a \
-      -DLMDB_LIBRARIES=../../dependencies/lmdb/libraries/liblmdb/liblmdb.a \
-      -DOpenCV_DIR=../../dependencies/opencv-2.4.11/build \
-      -DPROTOBUF_LIBRARY=../../install/lib/libprotobuf.a \
-      -DMATIO_LIBRARY=/home/<username>/Documents/dependencies/matio-1.5.2/matio/lib/libmatio.a \
+cmake -DGLOG_INCLUDE_DIR=<path> \
+      -DGFLAGS_INCLUDE_DIR=<path> \
+      -DAtlas_CBLAS_INCLUDE_DIR=<path> \
+      -DAtlas_CLAPACK_INCLUDE_DIR=<path> \
+      -DLEVELDB_INCLUDE=<path> \
+      -DSNAPPY_INCLUDE_DIR=<path> \
+      -DLMDB_INCLUDE_DIR=<path> \
+      -DPROTOBUF_INCLUDE_DIR=<path> \
+      -DMATIO_INCLUDE_DIR=<path> \
+      -DBoost_INCLUDE_DIR=<path> \
+      -DGLOG_LIBRARY=<path>/libglog.a \
+      -DGFLAGS_LIBRARY=<path>/libgflags.a \
+      -DAtlas_CBLAS_LIBRARY=<path>/libcblas.a \
+      -DAtlas_BLAS_LIBRARY=<path>/libatlas.a \
+      -DAtlas_LAPACK_LIBRARY=<path>/liblapack.a \
+      -DLEVELDB_LIBS=<path>/libleveldb.a \
+      -DSNAPPY_LIBS=<path>/libsnappy.a \
+      -DLMDB_LIBRARIES=<path>/liblmdb.a \
+      -DOpenCV_DIR=<path>/opencv-2.4.11/build \
+      -DPROTOBUF_LIBRARY=<path>/libprotobuf.a \
+      -DMATIO_LIBRARY=<path>/libmatio.a \
      ../deeplab-public
 make
 make install
