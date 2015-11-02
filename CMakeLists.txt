@@ -85,7 +85,7 @@ endif()
 #    Threads
 find_package(Threads REQUIRED)
 
-#	 Google-glog
+#     Google-glog
 find_package(Glog REQUIRED)
 include_directories(${GLOG_INCLUDE_DIRS})
 
@@ -137,6 +137,10 @@ include_directories(${LMDB_INCLUDE_DIR})
 #    OpenCV
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+#    MATIO
+find_package(MATIO REQUIRED)
+include_directories(${MATIO_INCLUDE_DIR})
 
 ###    Subdirectories    ##########################################################################
 
