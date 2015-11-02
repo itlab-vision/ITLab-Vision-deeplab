@@ -65,8 +65,10 @@ sudo apt-get install libgflags-dev
 
 ###ATLAS
 From Sources:
+
 1. Download [ATLAS](http://sourceforge.net/projects/math-atlas/files/Stable/3.10.2/atlas3.10.2.tar.bz2/download)
 2. Download [LAPACK](http://www.netlib.org/lapack/#_lapack_version_3_4_1)
+
 ```bash
 tar -zxvf lapack-3.4.1.tgz
 cd lapack-3.4.1
