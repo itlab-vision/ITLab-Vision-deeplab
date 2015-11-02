@@ -101,7 +101,8 @@ sudo apt-get install libatlas-base-dev
 wget http://www.hdfgroup.org/ftp/HDF5/current/src/CMake/hdf5-1.8.15-patch1-CMake.tar.gz
 tar -zxvf hdf5-1.8.15-patch1-CMake.tar.gz
 cd HDF518CMake/hdf5-1.8.15-patch1
-./configure --prefix=/home/<username>/Documents/install/hdf5/ --enable-build-all=yes --enable-fortran=yes --enable-cxx=yes
+./configure --prefix=/home/<username>/Documents/install/hdf5/ \
+            --enable-build-all=yes --enable-fortran=yes --enable-cxx=yes
 make
 make check
 make install
