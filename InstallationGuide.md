@@ -204,7 +204,7 @@ sudo apt-get install libprotobuf-dev protobuf-compiler
 
 ###MATIO
 ```bash
-wget http://sourceforge.net/projects/matio/files/latest/download
+ wget http://downloads.sourceforge.net/project/matio/matio/1.5.2/matio-1.5.2.tar.gz
 tar -zxvf matio-1.5.2.tar.gz
 cd matio-1.5.2
 // if configure procedure failed with relative path to HDF5 try absolute path
