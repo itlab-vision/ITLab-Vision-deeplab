@@ -1,5 +1,5 @@
 ## Execution Guide
-General approach to execution is a set of scripts since there are a lot parameters for running. There are 2 main scripts: 
+General approach to execution is a set of scripts since there are a lot of parameters for running. There are 2 main scripts: 
  - ``` scripts/run_pascal.sh ```
  - ``` scripts/run_densecrf.sh ```
 
