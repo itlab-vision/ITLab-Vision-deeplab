@@ -20,7 +20,7 @@ instructions to install dependencies and Deeplab itself:
 ###CUDA
 
 1. Download run-file of CUDA Toolkit (version >= 5.0, for example,
-   [CUDA Toolkit 7.5](https://developer.nvidia.com/cuda-toolkit).
+   [CUDA Toolkit 7.5](https://developer.nvidia.com/cuda-toolkit)).
 2. Execute run-file.
 
 Note: CUDA Toolkit is required to build Deeplab. Nowadays Deeplab doesn't
