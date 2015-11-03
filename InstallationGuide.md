@@ -14,6 +14,7 @@ instructions to install dependencies and Deeplab itself:
 - [ProtoBuf](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#protobuf)
 - [MATIO](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#matio)
 - [Deeplab](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
+- [Dense CRF](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
 
 ###BOOST
 From Sources:
@@ -206,9 +207,9 @@ make install
 
 ###DEEPLAB
 ```bash
-git clone https://bitbucket.org/deeplab/deeplab-public.git
-mkdir deeplab-public-build
-cd deeplab-public-build
+git clone https://github.com/ITLab-Vision/ITLab-Vision-deeplab.git
+mkdir ITLab-Vision-deeplab-build
+cd ITLab-Vision-deeplab-build
 export PATH=$PATH:/home/<username>/Documents/install/bin
 
 cmake -DGLOG_INCLUDE_DIR=<path> \
@@ -235,4 +236,14 @@ cmake -DGLOG_INCLUDE_DIR=<path> \
      ../deeplab-public
 make
 make install
+```
+
+###Dense CRF
+```bash
+cd ITLab-Vision-deeplab/densecrf
+% correct Makefile before make
+make
+% You will see 4 binary files: 
+% library libDenseCRF.a, 
+% applications - prog_refine_pascal, prog_refine_pascal_v4, prog_test_dence_crf
 ```
