@@ -2,6 +2,7 @@
 
 This document is Deeplab installation guide. Here you can find step-by-step
 instructions to install dependencies and Deeplab itself:
+- [CUDA](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#cuda)
 - [Boost](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#boost)
 - [Glog](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#glog)
 - [Gflags](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#gflags)
@@ -15,6 +16,15 @@ instructions to install dependencies and Deeplab itself:
 - [MATIO](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#matio)
 - [Deeplab](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
 - [Dense CRF](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#dense-crf)
+
+###CUDA
+
+1. Download run-file of CUDA Toolkit (version >= 5.0, for example,
+   [CUDA Toolkit 7.5](https://developer.nvidia.com/cuda-toolkit).
+2. Execute run-file.
+
+Note: CUDA Toolkit is required to build Deeplab. Nowadays Deeplab doesn't
+support `CPU_ONLY` mode.
 
 ###BOOST
 From Sources:
