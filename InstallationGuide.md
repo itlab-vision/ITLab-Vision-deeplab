@@ -14,7 +14,7 @@ instructions to install dependencies and Deeplab itself:
 - [ProtoBuf](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#protobuf)
 - [MATIO](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#matio)
 - [Deeplab](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
-- [Dense CRF](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
+- [Dense CRF](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#dense-crf)
 
 ###BOOST
 From Sources:
