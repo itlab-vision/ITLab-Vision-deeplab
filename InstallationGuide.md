@@ -243,7 +243,7 @@ cmake -DGLOG_INCLUDE_DIR=<path> \
       -DOpenCV_DIR=<path>/opencv-2.4.11/build \
       -DPROTOBUF_LIBRARY=<path>/libprotobuf.a \
       -DMATIO_LIBRARY=<path>/libmatio.a \
-     ../deeplab-public
+     ../ITLab-Vision-deeplab
 make
 make install
 ```
@@ -251,9 +251,9 @@ make install
 ###Dense CRF
 ```bash
 cd ITLab-Vision-deeplab/densecrf
-% correct Makefile before make
+# correct Makefile before make
 make
-% You will see 4 binary files: 
-% library libDenseCRF.a, 
-% applications - prog_refine_pascal, prog_refine_pascal_v4, prog_test_dence_crf
+# You will see 4 binary files:
+# library libDenseCRF.a,
+# applications - prog_refine_pascal, prog_refine_pascal_v4, prog_test_dence_crf
 ```
