@@ -1,15 +1,14 @@
 # Script helps to deploy Deeplab on a local machine
 
-DEST_DIR = $PWD/..
-DATASET = voc12
-MODELS = deeplab_largeFOV
-
+DEST_DIR=..
+DATASET=voc12
+MODELS=deeplab_largeFOV
 
 if [ ! -d ${DEST_DIR} ]; then
   mkdir -p ${DEST_DIR}
 fi
 
-DATASET_DIR = ${DEST_DIR}/exper/${DATASET}
+DATASET_DIR=${DEST_DIR}/exper/${DATASET}
 mkdir -p ${DATASET_DIR}/model
 mkdir -p ${DATASET_DIR}/res
 mkdir -p ${DATASET_DIR}/features
