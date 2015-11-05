@@ -51,6 +51,12 @@ set(LOOKED_FOR
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Atlas DEFAULT_MSG ${LOOKED_FOR})
 
+MESSAGE(STATUS "Atlas cblas include directory: " ${Atlas_CBLAS_INCLUDE_DIR})
+MESSAGE(STATUS "Atlas clapack include directory: " ${Atlas_CLAPACK_INCLUDE_DIR})
+MESSAGE(STATUS "Atlas cblas library directory: " ${Atlas_CBLAS_LIBRARY})
+MESSAGE(STATUS "Atlas blas library directory: " ${Atlas_BLAS_LIBRARY})
+MESSAGE(STATUS "Atlas lapack library directory: " ${Atlas_LAPACK_LIBRARY})
+
 if(ATLAS_FOUND)
 
   mark_as_advanced(${LOOKED_FOR})

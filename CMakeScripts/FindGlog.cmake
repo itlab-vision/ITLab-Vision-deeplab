@@ -24,6 +24,9 @@ find_library(GLOG_LIBRARY glog
 find_package_handle_standard_args(GLOG DEFAULT_MSG
     GLOG_INCLUDE_DIR GLOG_LIBRARY)
 
+MESSAGE(STATUS "Glog include directory: " ${GLOG_INCLUDE_DIR})
+MESSAGE(STATUS "Glog library directory: " ${GLOG_LIBRARY})
+
 if(GLOG_FOUND)
     set(GLOG_INCLUDE_DIRS ${GLOG_INCLUDE_DIR})
     set(GLOG_LIBRARIES ${GLOG_LIBRARY})

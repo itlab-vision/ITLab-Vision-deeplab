@@ -7,7 +7,6 @@
 #  GFLAGS_FOUND
 #  GFLAGS_INCLUDE_DIRS
 #  GFLAGS_LIBRARIES
-#  GFLAGS_LIBRARY_DIRS
 
 include(FindPackageHandleStandardArgs)
 
@@ -20,6 +19,9 @@ find_library(GFLAGS_LIBRARY gflags)
 
 find_package_handle_standard_args(GFLAGS DEFAULT_MSG
     GFLAGS_INCLUDE_DIR GFLAGS_LIBRARY)
+
+MESSAGE(STATUS "Gflags include directory: " ${GFLAGS_INCLUDE_DIR})
+MESSAGE(STATUS "Gflags library directory: " ${GFLAGS_LIBRARY})
 
 if(GFLAGS_FOUND)
     set(GFLAGS_INCLUDE_DIRS ${GFLAGS_INCLUDE_DIR})
