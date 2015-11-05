@@ -18,22 +18,22 @@ make install
 cd ..
 
 # install deeplab from sources using CMake
-#!/bin/bash
-echo "Glog, Gflags, Atlas, leveldb, snappy, lmdb, protobuf directories:"
 USR_INCLUDE_DIR="/usr/include"
-echo "${USR_INCLUDE_DIR}"
 USR_LIBRARY_DIR="/usr/lib/x86_64-linux-gnu"
-echo "${USR_LIBRARY_DIR}"
 
-echo "MatIO directories:"
 USR_LOCAL_INCLUDE_DIR="/usr/local/include"
-echo "${USR_LOCAL_INCLUDE_DIR}"
 USR_LOCAL_LIBRARY_DIR="/usr/local/lib"
-echo "${USR_LOCAL_LIBRARY_DIR}"
 
-echo "OpenCV directory:"
 USR_SHARE_DIR="/usr/share"
-echo "${USR_SHARE_DIR}"
+
+echo "Glog, Gflags, Atlas, leveldb, snappy, lmdb, protobuf directories:"
+echo "-- ${USR_INCLUDE_DIR}"
+echo "-- ${USR_LIBRARY_DIR}"
+echo "MatIO directories:"
+echo "-- ${USR_LOCAL_INCLUDE_DIR}"
+echo "-- ${USR_LOCAL_LIBRARY_DIR}"
+echo "OpenCV directory:"
+echo "-- ${USR_SHARE_DIR}"
 
 rm -r ITLab-Vision-deeplab
 git clone https://github.com/ITLab-Vision/ITLab-Vision-deeplab.git
