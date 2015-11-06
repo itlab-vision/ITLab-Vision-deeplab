@@ -41,6 +41,9 @@ export PATH=$PATH:${INSTALL_DIR}/bin
 # need to export HDF5_DIR to find hdf5 include and library directories
 export HDF5_DIR=${HDF5_DIR}
 
+cd ../../..
+mkdir ITLab-Vision-deeplab-build
+cd ITLab-Vision-deeplab-build
 cmake -DGLOG_INCLUDE_DIR=${GLOG_INCLUDE_DIR} \
       -DGFLAGS_INCLUDE_DIR=${GFLAGS_INCLUDE_DIR} \
       -DAtlas_CBLAS_INCLUDE_DIR=${Atlas_CBLAS_INCLUDE_DIR} \
