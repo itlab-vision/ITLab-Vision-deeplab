@@ -1,6 +1,7 @@
+#!/bin/bash
 # Script helps to deploy Deeplab on a local machine
 
-DEST_DIR=..
+DEST_DIR=../..
 DATASET=voc12
 MODELS=deeplab_largeFOV
 
