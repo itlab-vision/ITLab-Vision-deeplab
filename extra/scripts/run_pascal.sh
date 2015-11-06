@@ -1,55 +1,11 @@
 #!/bin/sh
 
-# MODIFY PATH for YOUR SETTING
-
-CAFFE_DIR=../code
-CAFFE_BIN=${CAFFE_DIR}/.build_release/tools/caffe.bin
-
-EXP=voc12
-NUM_LABELS=21
-DATA_ROOT=${ROOT_DIR}/rmt/data/pascal/VOCdevkit/VOC2012
-
-# Specify which model to train
-
-NET_ID=vgg128_noup
-
-#TRAIN_SET_SUFFIX=
-TRAIN_SET_SUFFIX=_aug
-
-TRAIN_SET_STRONG=train
-#TRAIN_SET_STRONG=train200
-#TRAIN_SET_STRONG=train500
-#TRAIN_SET_STRONG=train1000
-#TRAIN_SET_STRONG=train750
-
-#TRAIN_SET_WEAK_LEN=5000
-
-DEV_ID=0
-
-#####
-
-# Create dirs
-
-CONFIG_DIR=${EXP}/config/${NET_ID}
-MODEL_DIR=${EXP}/model/${NET_ID}
-mkdir -p ${MODEL_DIR}
-LOG_DIR=${EXP}/log/${NET_ID}
-mkdir -p ${LOG_DIR}
 export GLOG_log_dir=${LOG_DIR}
-
-# Run
-
-RUN_TRAIN=1
-RUN_TEST=1
-RUN_TRAIN2=1
-RUN_TEST2=1
-RUN_SAVE=0
 
 # Training #1 (on train_aug)
 
 if [ ${RUN_TRAIN} -eq 1 ]; then
     #
-    LIST_DIR=${EXP}/list
     TRAIN_SET=train${TRAIN_SET_SUFFIX}
     if [ -z ${TRAIN_SET_WEAK_LEN} ]; then
 	TRAIN_SET_WEAK=${TRAIN_SET}_diff_${TRAIN_SET_STRONG}
@@ -59,9 +15,9 @@ if [ ${RUN_TRAIN} -eq 1 ]; then
 	comm -3 ${LIST_DIR}/${TRAIN_SET}.txt ${LIST_DIR}/${TRAIN_SET_STRONG}.txt | head -n ${TRAIN_SET_WEAK_LEN} > ${LIST_DIR}/${TRAIN_SET_WEAK}.txt
     fi
     #
-    MODEL=${EXP}/model/${NET_ID}/init.caffemodel
+    MODEL=${MODEL_DIR}/init.caffemodel
     #
-    echo Training net ${EXP}/${NET_ID}
+    echo Training net ${MODEL_DIR}
     for pname in train solver; do
 	sed "$(eval echo $(cat sub.sed))" \
 	    ${CONFIG_DIR}/${pname}.prototxt > ${CONFIG_DIR}/${pname}_${TRAIN_SET}.prototxt
@@ -80,15 +36,15 @@ fi
 if [ ${RUN_TEST} -eq 1 ]; then
     #
     for TEST_SET in val; do
-	TEST_ITER=`cat voc12/list/${TEST_SET}.txt | wc -l`
-	MODEL=${EXP}/model/${NET_ID}/test.caffemodel
-	#MODEL=${EXP}/model/${NET_ID}/train_iter_4000.caffemodel
+	TEST_ITER=`cat ${LIST_DIR}${TEST_SET}.txt | wc -l`
+	MODEL=${MODEL_DIR}/test.caffemodel
+
 	if [ ! -f ${MODEL} ]; then
-	    MODEL=`ls -t ${EXP}/model/${NET_ID}/train_iter_*.caffemodel | head -n 1`
+	    MODEL=`ls -t ${MODEL_DIR}/train_iter_*.caffemodel | head -n 1`
 	fi
 	#
-	echo Testing net ${EXP}/${NET_ID}
-	FEATURE_DIR=${EXP}/features/${NET_ID}
+	echo Testing net ${MODEL_DIR}
+	FEATURE_DIR=${EXP_DIR}/features/${NET_ID}
 	mkdir -p ${FEATURE_DIR}/${TEST_SET}/fc8
 	mkdir -p ${FEATURE_DIR}/${TEST_SET}/crf
 	sed "$(eval echo $(cat sub.sed))" \
@@ -106,7 +62,6 @@ fi
 
 if [ ${RUN_TRAIN2} -eq 1 ]; then
     #
-    LIST_DIR=${EXP}/list
     TRAIN_SET=trainval${TRAIN_SET_SUFFIX}
     if [ -z ${TRAIN_SET_WEAK_LEN} ]; then
 	TRAIN_SET_WEAK=${TRAIN_SET}_diff_${TRAIN_SET_STRONG}
@@ -116,12 +71,12 @@ if [ ${RUN_TRAIN2} -eq 1 ]; then
 	comm -3 ${LIST_DIR}/${TRAIN_SET}.txt ${LIST_DIR}/${TRAIN_SET_STRONG}.txt | head -n ${TRAIN_SET_WEAK_LEN} > ${LIST_DIR}/${TRAIN_SET_WEAK}.txt
     fi
     #
-    MODEL=${EXP}/model/${NET_ID}/init2.caffemodel
+    MODEL=${MODEL_DIR}/init2.caffemodel
     if [ ! -f ${MODEL} ]; then
-	MODEL=`ls -t ${EXP}/model/${NET_ID}/train_iter_*.caffemodel | head -n 1`
+	MODEL=`ls -t ${MODEL_DIR}/train_iter_*.caffemodel | head -n 1`
     fi
     #
-    echo Training2 net ${EXP}/${NET_ID}
+    echo Training2 net ${MODEL_DIR}
     for pname in train solver2; do
 	sed "$(eval echo $(cat sub.sed))" \
 	    ${CONFIG_DIR}/${pname}.prototxt > ${CONFIG_DIR}/${pname}_${TRAIN_SET}.prototxt
@@ -138,14 +93,14 @@ fi
 if [ ${RUN_TEST2} -eq 1 ]; then
     #
     for TEST_SET in val test; do
-	TEST_ITER=`cat voc12/list/${TEST_SET}.txt | wc -l`
-	MODEL=${EXP}/model/${NET_ID}/test2.caffemodel
+	TEST_ITER=`cat ${LIST_DIR}/${TEST_SET}.txt | wc -l`
+	MODEL=${MODEL_DIR}/test2.caffemodel
 	if [ ! -f ${MODEL} ]; then
-	    MODEL=`ls -t ${EXP}/model/${NET_ID}/train2_iter_*.caffemodel | head -n 1`
+	    MODEL=`ls -t ${MODEL_DIR}/train2_iter_*.caffemodel | head -n 1`
 	fi
 	#
-	echo Testing2 net ${EXP}/${NET_ID}
-	FEATURE_DIR=${EXP}/features2/${NET_ID}
+	echo Testing2 net ${MODEL_DIR}
+	FEATURE_DIR=${EXP_DIR}/features2/${NET_ID}
 	mkdir -p ${FEATURE_DIR}/${TEST_SET}/fc8
 	mkdir -p ${FEATURE_DIR}/${TEST_SET}/crf
 	sed "$(eval echo $(cat sub.sed))" \
@@ -163,17 +118,16 @@ fi
 
 if [ ${RUN_SAVE} -eq 1 ]; then
     #
-    MODEL=${EXP}/model/${NET_ID}/test2.caffemodel
+    MODEL=${MODEL_DIR}/test2.caffemodel
     if [ ! -f ${MODEL} ]; then
-	MODEL=`ls -t ${EXP}/model/${NET_ID}/train*_iter_*.caffemodel | head -n 1`
+	MODEL=`ls -t ${MODEL_DIR}/train*_iter_*.caffemodel | head -n 1`
     fi
-    MODEL_DEPLOY=${EXP}/model/${NET_ID}/deploy.caffemodel
+    MODEL_DEPLOY=${MODEL_DIR}/deploy.caffemodel
     #
-    echo Translating net ${EXP}/${NET_ID}
+    echo Translating net ${MODEL_DIR}
         CMD="${CAFFE_BIN} save \
          --model=${CONFIG_DIR}/deploy.prototxt \
          --weights=${MODEL} \
          --out_weights=${MODEL_DEPLOY}"
 	echo Running ${CMD} && ${CMD}
 fi
-
