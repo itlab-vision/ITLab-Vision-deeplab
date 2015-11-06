@@ -7,7 +7,7 @@
 #  Atlas_FOUND
 #  Atlas_INCLUDE_DIRS
 #  Atlas_LIBRARIES
-#  Atlas_LIBRARYRARY_DIRS
+#  Atlas_LIBRARY_DIRS
 
 set(Atlas_INCLUDE_SEARCH_PATHS
   /usr/include/atlas
@@ -23,11 +23,20 @@ set(Atlas_LIB_SEARCH_PATHS
   $ENV{Atlas_ROOT_DIR}/lib
 )
 
-find_path(Atlas_CBLAS_INCLUDE_DIR NAMES cblas.h PATHS ${Atlas_INCLUDE_SEARCH_PATHS})
-find_path(Atlas_CLAPACK_INCLUDE_DIR NAMES clapack.h PATHS ${Atlas_INCLUDE_SEARCH_PATHS})
-find_library(Atlas_CBLAS_LIBRARY NAMES ptcblas_r ptcblas cblas_r cblas PATHS ${Atlas_LIB_SEARCH_PATHS})
-find_library(Atlas_BLAS_LIBRARY NAMES atlas_r atlas PATHS ${Atlas_LIB_SEARCH_PATHS})
-find_library(Atlas_LAPACK_LIBRARY NAMES alapack_r alapack lapack_atlas PATHS ${Atlas_LIB_SEARCH_PATHS})
+find_path(Atlas_CBLAS_INCLUDE_DIR
+    NAMES cblas.h
+    PATHS ${Atlas_INCLUDE_SEARCH_PATHS})
+find_path(Atlas_CLAPACK_INCLUDE_DIR NAMES clapack.h
+    PATHS ${Atlas_INCLUDE_SEARCH_PATHS})
+find_library(Atlas_CBLAS_LIBRARY
+    NAMES ptcblas_r ptcblas cblas_r cblas
+    PATHS ${Atlas_LIB_SEARCH_PATHS})
+find_library(Atlas_BLAS_LIBRARY
+    NAMES atlas_r atlas
+    PATHS ${Atlas_LIB_SEARCH_PATHS})
+find_library(Atlas_LAPACK_LIBRARY
+    NAMES alapack_r alapack lapack_atlas
+    PATHS ${Atlas_LIB_SEARCH_PATHS})
 
 set(LOOKED_FOR
 
@@ -41,6 +50,12 @@ set(LOOKED_FOR
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Atlas DEFAULT_MSG ${LOOKED_FOR})
+
+MESSAGE(STATUS "Atlas cblas include directory: " ${Atlas_CBLAS_INCLUDE_DIR})
+MESSAGE(STATUS "Atlas clapack include directory: " ${Atlas_CLAPACK_INCLUDE_DIR})
+MESSAGE(STATUS "Atlas cblas library directory: " ${Atlas_CBLAS_LIBRARY})
+MESSAGE(STATUS "Atlas blas library directory: " ${Atlas_BLAS_LIBRARY})
+MESSAGE(STATUS "Atlas lapack library directory: " ${Atlas_LAPACK_LIBRARY})
 
 if(ATLAS_FOUND)
 

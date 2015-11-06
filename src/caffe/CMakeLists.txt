@@ -38,6 +38,7 @@ target_link_libraries(caffe proto
         ${HDF5_LIBRARIES}
         ${LEVELDB_LIBS}
         ${LMDB_LIBRARIES}
+        ${MATIO_LIBRARIES}
         ${OpenCV_LIBS}
         ${CMAKE_THREAD_LIBS_INIT}
 )
