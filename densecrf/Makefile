@@ -15,14 +15,14 @@ all:
 	make clean
 	make prog_test_densecrf
 	make prog_refine_pascal
-	make prog_refine_pascal_v5
+	make prog_refine_pascal_v4
 
 clean:
 	rm -f *.a
 	rm -f *.o
 	rm -f prog_test_densecrf
 	rm -f prog_refine_pascal
-	rm -f prog_refine_pascal_v5
+	rm -f prog_refine_pascal_v4
 
 libDenseCRF.a: libDenseCRF/bipartitedensecrf.cpp libDenseCRF/densecrf.cpp libDenseCRF/filter.cpp \
 	libDenseCRF/permutohedral.cpp libDenseCRF/util.cpp libDenseCRF/densecrf.h libDenseCRF/fastmath.h \
