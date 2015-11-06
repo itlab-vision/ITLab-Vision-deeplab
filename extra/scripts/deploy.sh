@@ -6,7 +6,7 @@ SCRIPTS_DIR=${PWD}
 DEST_DIR=${PWD}/../..
 DATASET=voc12
 NET_ID=deeplab_largeFOV
-DATA_ROOT=/common/itlab-vision-shared
+DATA_ROOT=/common/itlab-vision-shared/pascal/pascal2012devkit
 
 # URLs to download solver and network parameters
 SOLVER_URL=http://ccvl.stat.ucla.edu/ccvl/DeepLab-LargeFOV/solver.prototxt
@@ -35,6 +35,7 @@ fi
 
 # create directory hierarchy
 EXP_DIR=${DEST_DIR}/exper/${DATASET}
+EXP=$EXP_DIR
 CONFIG_DIR=${EXP_DIR}/config/${NET_ID}
 LIST_DIR=${EXP_DIR}/list
 LOG_DIR=${EXP_DIR}/log/${NET_ID}
