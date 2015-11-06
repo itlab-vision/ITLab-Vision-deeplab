@@ -3,9 +3,9 @@
 # supposed that all dependencies were build from sources
 
 # FIX: write correct directory with installed dependencies
-INSTALL_DIR="/home/user/Documents/install"
+INSTALL_DIR=${HOME}/Documents/install
 # FIX: write correct directory with dependecies built from sources
-DEPENDENCIES_DIR="/home/user/Documents/dependencies"
+DEPENDENCIES_DIR=${HOME}/Documents/dependencies
 
 
 # include direcotories
