@@ -137,9 +137,9 @@ void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, in
         throw exception("Fail to open file: '" + fileName + "'.");
     }
 
-    ifs >> rows;
-    ifs >> cols;
-    ifs >> channels;
+    ifs.read((char*)&rows, sizeof(int));
+    ifs.read((char*)&cols, sizeof(int));
+    ifs.read((char*)&channels, sizeof(int));
 
     const int num_el = rows * cols * channels;
     data = new T[num_el];
@@ -156,9 +156,9 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
         throw exception("Fail to open file: '" + fileName + "'.");
     }    
 
-    ofs << rows;
-    ofs << cols;
-    ofs << channels;
+    ofs.write((char*)&rows, sizeof(int));
+    ofs.write((char*)&cols, sizeof(int));
+    ofs.write((char*)&channels, sizeof(int));
 
     int num_el = rows * cols * channels;
     ofs.write(reinterpret_cast<const char*>(data), sizeof(T) * num_el);
