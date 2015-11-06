@@ -36,7 +36,7 @@ fi
 if [ ${RUN_TEST} -eq 1 ]; then
     #
     for TEST_SET in val; do
-	TEST_ITER=`cat ${LIST_DIR}${TEST_SET}.txt | wc -l`
+	TEST_ITER=`cat ${LIST_DIR}/${TEST_SET}.txt | wc -l`
 	MODEL=${MODEL_DIR}/test.caffemodel
 
 	if [ ! -f ${MODEL} ]; then
