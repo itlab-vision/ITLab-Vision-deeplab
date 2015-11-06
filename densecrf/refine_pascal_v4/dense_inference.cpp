@@ -1,4 +1,4 @@
-#include "dense_inference_cpp0x.hpp"
+#include "dense_inference.hpp"
 
 
 template <> enum matio_classes matio_class_map<float>() { return MAT_C_SINGLE; }
