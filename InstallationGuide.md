@@ -255,5 +255,5 @@ cd ITLab-Vision-deeplab/densecrf
 make
 # You will see 4 binary files:
 # library libDenseCRF.a,
-# applications - prog_refine_pascal, prog_refine_pascal_v4, prog_test_dence_crf
+# applications - prog_refine_pascal, prog_refine_pascal_v4, prog_test_dense_crf
 ```
