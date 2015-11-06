@@ -34,11 +34,22 @@
 
 #include "dense_inference.hpp"
 
-
+template <typename Dtype> enum matio_classes matio_class_map();
 template <> enum matio_classes matio_class_map<float>() { return MAT_C_SINGLE; }
 template <> enum matio_classes matio_class_map<double>() { return MAT_C_DOUBLE; }
 template <> enum matio_classes matio_class_map<int>() { return MAT_C_INT32; }
 template <> enum matio_classes matio_class_map<unsigned int>() { return MAT_C_UINT32; }
+
+
+template <typename T>
+void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols,
+        int& channels , bool do_ppm_format = false);
+
+template <typename T>
+void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, int& channels);
+
+template <typename T>
+void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels);
 
 
 template <typename T>
@@ -290,7 +301,7 @@ int main(int argc, char* argv[]) {
     assert(inp.imageDir.empty() == false && inp.featureDir.empty() == false && inp.outputDir.empty() == false);
     
     std::vector<std::string> featureNamesList;
-    listDirectory(inp.featureDir, ".mat", true, featureNamesList);
+    listDirectory(inp.featureDir, "*.mat", true, featureNamesList);
     
     std::vector<std::string> imageNamesList;
     generateImageNames(featureNamesList, "_blob_0", imageNamesList);

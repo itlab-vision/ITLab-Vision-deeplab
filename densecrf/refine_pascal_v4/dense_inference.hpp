@@ -72,22 +72,6 @@ private:
     std::string message;
 };
 
-
-template <typename Dtype> enum matio_classes matio_class_map();
-
-
-template <typename T>
-void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols,
-        int& channels , bool do_ppm_format = false);
-
-template <typename T>
-void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, int& channels);
-
-template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels);
-
-
-
 class InputData {
 public:
     std::string imageDir;
