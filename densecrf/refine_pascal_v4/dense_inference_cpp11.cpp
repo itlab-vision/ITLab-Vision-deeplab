@@ -58,7 +58,7 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
     using TMat_VarFree = decltype(Mat_VarFree);
 
     std::unique_ptr<mat_t, TMat_Close> matfp(Mat_Open(fileName.c_str(), MAT_ACC_RDONLY), Mat_Close);
-    if (matfp != nullptr) {
+    if (matfp == nullptr) {
         throw exception("Error opening MAT file: '" + fileName + "'.");
     }
 
@@ -256,6 +256,8 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
         } else {
             closedir(testEntry);
         }
+
+	entry = readdir(dir);
     }
 
     closedir(dir);

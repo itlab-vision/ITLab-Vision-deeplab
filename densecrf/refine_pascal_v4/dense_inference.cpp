@@ -55,7 +55,7 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 template <typename T>
 void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool do_ppm_format) {
     mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
-    if (matfp != NULL) {
+    if (matfp == NULL) {
         throw exception("Error opening MAT file: '" + fileName + "'.");
     }
 
@@ -265,6 +265,10 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
     }
 
     dirent* entry = readdir(dir);
+    if (entry == NULL) {
+	throw exception("Directory : '" + path + "' is empty!");
+    }
+
     while (entry != NULL) {
         DIR* testEntry = opendir(entry->d_name);
         
@@ -280,6 +284,8 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
         } else {
             closedir(testEntry);
         }
+	
+	entry = readdir(dir);
     }
 
     closedir(dir);
