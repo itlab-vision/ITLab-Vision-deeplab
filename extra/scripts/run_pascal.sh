@@ -1,5 +1,37 @@
 #!/bin/sh
 
+_script="$(readlink -f ${BASH_SOURCE[0]})"
+_base="$(dirname $_script)"
+cd ${_base}
+
+# general parameters
+SCRIPTS_DIR=${PWD}
+DEST_DIR=${PWD}/../..
+DATASET=voc12
+NET_ID=deeplab_largeFOV
+DATA_ROOT=/common/itlab-vision-shared/pascal/pascal2012devkit
+
+# parameters for run_pascal.sh
+CAFFE_DIR=../../src/caffe
+CAFFE_BIN=../../../ITLab-Vision-deeplab-build/tools/caffe
+NUM_LABELS=21
+TRAIN_SET_SUFFIX=_aug
+TRAIN_SET_STRONG=train
+DEV_ID=0
+RUN_TRAIN=0
+RUN_TEST=0
+RUN_TRAIN2=0
+RUN_TEST2=1
+RUN_SAVE=0
+
+# directory hierarchy
+EXP_DIR=${DEST_DIR}/exper/${DATASET}
+EXP=$EXP_DIR
+CONFIG_DIR=${EXP_DIR}/config/${NET_ID}
+LIST_DIR=${EXP_DIR}/list
+LOG_DIR=${EXP_DIR}/log/${NET_ID}
+MODEL_DIR=${EXP_DIR}/model/${NET_ID}
+
 export GLOG_log_dir=${LOG_DIR}
 
 # Training #1 (on train_aug)

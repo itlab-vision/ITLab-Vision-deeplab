@@ -1,5 +1,10 @@
 #!/bin/bash
 # Script helps to deploy Deeplab on a local machine
+_script="$(readlink -f ${BASH_SOURCE[0]})"
+_base="$(dirname $_script)"
+echo "Current working directory: ${_base}"
+cd ${_base}
+
 
 # general parameters
 SCRIPTS_DIR=${PWD}
@@ -15,19 +20,6 @@ TEST_NET_URL=http://ccvl.stat.ucla.edu/ccvl/DeepLab-LargeFOV/test.prototxt
 TRAIN_NET_URL=http://ccvl.stat.ucla.edu/ccvl/DeepLab-LargeFOV/train.prototxt
 CAFFE_MODEL_URL=http://ccvl.stat.ucla.edu/ccvl/DeepLab-LargeFOV/train2_iter_8000.caffemodel
 LIST_URL=http://www.cs.ucla.edu/~lcchen/deeplab-public/list.zip
-
-# parameters for run_pascal.sh
-CAFFE_DIR=../../src/caffe
-CAFFE_BIN=../../../ITLab-Vision-deeplab-build/tools/caffe
-NUM_LABELS=21
-TRAIN_SET_SUFFIX=_aug
-TRAIN_SET_STRONG=train
-DEV_ID=0
-RUN_TRAIN=1
-RUN_TEST=1
-RUN_TRAIN2=1
-RUN_TEST2=1
-RUN_SAVE=0
 
 if [ ! -d ${DEST_DIR} ]; then
   mkdir -p ${DEST_DIR}
@@ -68,8 +60,3 @@ cd ${LIST_DIR}
 wget ${LIST_URL}
 unzip -j list.zip
 rm list.zip
-
-# run experiment
-cd ${SCRIPTS_DIR}
-source run_pascal.sh
-# source run_densecrf.sh
