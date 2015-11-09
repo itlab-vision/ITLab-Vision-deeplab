@@ -40,7 +40,5 @@ foreach(header ${ProtoHeaders})
 
 endforeach(header)
 
-file(WRITE __init__.py)
-install(PROGRAMS __init__.py       DESTINATION python/caffe/proto)
 install(PROGRAMS ${ProtoSourcesPy} DESTINATION python/caffe/proto)
 
