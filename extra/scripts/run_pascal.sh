@@ -1,5 +1,8 @@
 #!/bin/sh
 
+#system parameters
+CUDA_LIBS_DIR=/common/cuda-6.5/lib64
+
 # general parameters
 SCRIPTS_DIR=${PWD}
 DEST_DIR=${SCRIPTS_DIR}/../..
@@ -28,7 +31,7 @@ LIST_DIR=${EXP_DIR}/list
 LOG_DIR=${EXP_DIR}/log/${NET_ID}
 MODEL_DIR=${EXP_DIR}/model/${NET_ID}
 
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/common/cuda-6.5/lib64
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_LIBS_DIR}
 export GLOG_log_dir=${LOG_DIR}
 
 # Training #1 (on train_aug)
