@@ -1,12 +1,8 @@
 #!/bin/sh
 
-_script="$(readlink -f ${BASH_SOURCE[0]})"
-_base="$(dirname $_script)"
-cd ${_base}
-
 # general parameters
 SCRIPTS_DIR=${PWD}
-DEST_DIR=${PWD}/../..
+DEST_DIR=${SCRIPTS_DIR}/../..
 DATASET=voc12
 NET_ID=deeplab_largeFOV
 DATA_ROOT=/common/itlab-vision-shared/pascal/pascal2012devkit
@@ -32,6 +28,7 @@ LIST_DIR=${EXP_DIR}/list
 LOG_DIR=${EXP_DIR}/log/${NET_ID}
 MODEL_DIR=${EXP_DIR}/model/${NET_ID}
 
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/common/cuda-6.5/lib64
 export GLOG_log_dir=${LOG_DIR}
 
 # Training #1 (on train_aug)
