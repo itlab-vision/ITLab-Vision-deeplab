@@ -43,7 +43,7 @@ template <> enum matio_classes matio_class_map<unsigned int>() { return MAT_C_UI
 
 template <typename T>
 void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols,
-        int& channels , bool do_ppm_format = false);
+        int& channels, bool do_ppm_format = false);
 
 template <typename T>
 void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, int& channels);
@@ -54,27 +54,25 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 
 template <typename T>
 void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool do_ppm_format) {
-    mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
-    if (matfp == NULL) {
+    using TMat_Close = decltype(Mat_Close);
+    using TMat_VarFree = decltype(Mat_VarFree);
+
+    std::unique_ptr<mat_t, TMat_Close> matfp(Mat_Open(fileName.c_str(), MAT_ACC_RDONLY), Mat_Close);
+    if (matfp == nullptr) {
         throw exception("Error opening MAT file: '" + fileName + "'.");
     }
 
     // Read data
-    matvar_t* matvar = Mat_VarReadInfo(matfp, "data");
-    if (matvar == NULL) {
-        Mat_Close(matfp);
+    std::unique_ptr<matvar_t, TMat_VarFree> matvar(Mat_VarReadInfo(matfp.get(), "data"), Mat_VarFree);
+    if (matvar == nullptr) {
         throw exception("Field 'data' not present. In MAT file: '" + fileName + "'.");
     }
 
     if (matvar->class_type != matio_class_map<T>()) {
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
         throw exception("Field 'data' must be of the right class (single/double). In MAT file: '" + fileName + "'.");
     }
     if ((4 <= matvar->rank) && (matvar->dims[3] != 1)) {
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
-        throw exception("Field 'data' cannot have ndims > 3. In MAT file: '" + fileName + "'.");
+        throw exception("Rank: " + std::atof(matvar->rank) + ". Field 'data' cannot have ndims > 3. In MAT file: '" + fileName + "'.");
     }
 
     int fileSize = 1;
@@ -89,14 +87,10 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
 
     assert(dataSize <= fileSize);
 
-    T* fileData = new T[fileSize];
+    std::unique_ptr<T> fileData(new T[fileSize]);
     data = new T[dataSize];
     
-    if (Mat_VarReadDataLinear(matfp, matvar, fileData, 0, 1, fileSize) != 0) {
-        delete[] data;
-        delete[] fileData;
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
+    if (Mat_VarReadDataLinear(matfp.get(), matvar, fileData.get(), 0, 1, fileSize) != 0) {
         throw exception("Error reading array 'data' from MAT file: '" + fileName + "'.");
     }
 
@@ -113,10 +107,10 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
             for (int row = 0; row < rows; ++row) {
                 for (int column = 0; column < cols; ++column) {
                     // perform transpose of fileData
-                    const int in_ind    = column + row * matvar->dims[0] + channel * channelSize;    
+                    const int in_ind    = column + row * matvar->dims[0];    
                     const int out_ind = row * out_offset + column * channels + channel;
                     // note the minus sign
-                    data[out_ind] = -fileData[in_ind]; 
+                    data[out_ind] = -fileData.get()[in_ind + channel * channelSize];    
                 }
             }
         }
@@ -126,17 +120,13 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
         for (int channel = 0; channel < channels; ++channel) {
             for (int row = 0; row < rows; ++row) {
                 for (int column = 0; column < cols; ++column) {
-                    const int in_ind    = row + column * matvar->dims[0] + channel * channelSize;
-                    const int out_ind = row + column * row + channel * out_offset; 
-                    data[out_ind] = -fileData[in_ind];        
+                    const int in_ind    = row + column * matvar->dims[0];
+                    const int out_ind = row + column * row; 
+                    data[out_ind + channel * out_offset] = -fileData.get()[in_ind + channel * channelSize];        
                 }
             }
         }
     }
-
-    Mat_VarFree(matvar);
-    Mat_Close(matfp);
-    delete[] fileData;
 }
 
 template <typename T>
@@ -198,10 +188,10 @@ std::ostream& operator<<(std::ostream& os, const InputData& inp) {
         << "MaxIterations:        " << inp.maxIterations << std::endl
     //    << "MaxImgSize:             " << inp.MaxImgSize << std::endl
     //    << "NumClass:                 " << inp.NumClass << std::endl
-        << "posW:            " << inp.posW << std::endl
+        << "posW:            " << inp.posW        << std::endl
         << "posXStd:     " << inp.posXStd << std::endl
         << "posYStd:     " << inp.posYStd << std::endl
-        << "Bi_W:        " << inp.bilateralW << std::endl
+        << "Bi_W:            " << inp.bilateralW        << std::endl
         << "Bi_X_Std:    " << inp.bilateralXStd << std::endl
         << "Bi_Y_Std:    " << inp.bilateralYStd << std::endl
         << "Bi_R_Std:    " << inp.bilateralRStd << std::endl
@@ -209,18 +199,18 @@ std::ostream& operator<<(std::ostream& os, const InputData& inp) {
         << "Bi_B_Std:    " << inp.bilateralBStd << std::endl;
 }
 
-InputData::InputData(int argc, char** argv)   
+InputData::InputData(int argc, char** argv) :
+    InputData()    
 {
-    init();
     for(int k = 1; k < argc; ++k) {
-        if (std::strcmp(argv[k], "-id") == 0 && k + 1 != argc) {
+        if (std::strcmp(argv[k], "-id")==0 && k+1!=argc) {
             imageDir = argv[++k];
         } else if (std::strcmp(argv[k], "-fd")==0 && k+1!=argc) {
             featureDir = argv[++k];
         } else if (std::strcmp(argv[k], "-sd")==0 && k+1!=argc) {
             outputDir = argv[++k];
         } else if (std::strcmp(argv[k], "-i")==0 && k+1!=argc) {
-            maxIterations = atoi(argv[++k]);
+            MaxIterations = atoi(argv[++k]);
         } else if (std::strcmp(argv[k], "-px")==0 && k+1!=argc) {
             posXStd = atof(argv[++k]);
         } else if (std::strcmp(argv[k], "-py")==0 && k+1!=argc) {
@@ -243,36 +233,18 @@ InputData::InputData(int argc, char** argv)
     }
 }
 
-void InputData::init() {
-    maxIterations = 10;
-
-    posW    = 3;
-    posXStd = 3;
-    posYStd = 3;
-    bilateralW    = 5;
-    bilateralXStd = 70;
-    bilateralYStd = 70;
-    bilateralRStd = 5;
-    bilateralGStd = 5;
-    bilateralBStd = 5;
-}
-
 
 void listDirectory(const std::string& path, const std::string& pattern, bool stripExtension, std::vector<std::string>& fileNames) {
     DIR* dir = opendir(path.c_str());
-    if (dir == NULL) {
+    if (dir == nullptr) {
         throw exception("Error opening dir: '" + path + "'.");
     }
 
     dirent* entry = readdir(dir);
-    if (entry == NULL) {
-	throw exception("Directory : '" + path + "' is empty!");
-    }
-
-    while (entry != NULL) {
+    while (entry != nullptr) {
         DIR* testEntry = opendir(entry->d_name);
         
-        if (testEntry == NULL) { // if not a directory
+        if (testEntry == nullptr) { // if not a directory
             if (fnmatch(pattern.c_str(), entry->d_name, 0) == 0) {
                 if (stripExtension == true) {
                     std::string tmp(entry->d_name);                    
@@ -284,7 +256,7 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
         } else {
             closedir(testEntry);
         }
-	
+
 	entry = readdir(dir);
     }
 
@@ -329,9 +301,14 @@ int main(int argc, char* argv[]) {
 
         fileName = inp.featureDir + "/" + featureNamesList[i] + ".mat";
 
-        float* features = NULL;
+        float* features = nullptr;
         int featuresChannels;
-        LoadMatFile(fileName, features, featuresRows, featuresColumns, featuresChannels, do_ppm_format);
+        try {
+            LoadMatFile(fileName, features, featuresRows, featuresColumns, featuresChannels, do_ppm_format);
+        } catch (const exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
 
         // Setup the CRF model
         DenseCRF2D crf(featuresColumns, featuresRows, featuresChannels);
@@ -353,7 +330,12 @@ int main(int argc, char* argv[]) {
 
         // save results
         fileName = inp.outputDir + "/" + imageNamesList[i] + ".bin";
-        SaveBinFile(fileName, result, featuresRows, featuresColumns, 1);
+        try {
+            SaveBinFile(fileName, result, featuresRows, featuresColumns, 1);
+        } catch (const exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 2;
+        }
         
 
         delete[] result;
