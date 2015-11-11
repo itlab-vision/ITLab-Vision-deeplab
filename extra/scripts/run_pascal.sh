@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# ATTENTION: if you run testing existing model (when only RUN_TEST2=1)
+# you need to put files run_pascal.sh, run_pascal_sbatch.sh, sub.sed
+# into directory exper/ (at the same level as voc12 directory)
+
 #system parameters
 CUDA_LIBS_DIR=/common/cuda-6.5/lib64
 
@@ -25,7 +29,7 @@ RUN_SAVE=0
 
 # directory hierarchy
 EXP_DIR=${DEST_DIR}/exper/${DATASET}
-EXP=$EXP_DIR
+EXP=${DATASET}
 CONFIG_DIR=${EXP_DIR}/config/${NET_ID}
 LIST_DIR=${EXP_DIR}/list
 LOG_DIR=${EXP_DIR}/log/${NET_ID}
