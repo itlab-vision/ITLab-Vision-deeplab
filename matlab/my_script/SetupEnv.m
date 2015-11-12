@@ -1,22 +1,25 @@
-% set up the environment variables
-%
+%SETUPENV Initializes a set of working variables
+%   
 
-clear all; close all;
-load('./pascal_seg_colormap.mat');
+%% Datasets
+dataset    = 'voc12';          %'voc12', 'coco'
+trainset   = 'trainval';
+testset    = 'val';            %'val', 'test'
 
-is_server       = 1;
+%% Completed steps
+is_mat = false;
+is_denseCRF_done = true;
 
-crf_load_mat    = 1;   % the densecrf code load MAT files directly (no call SaveMatAsBin.m)
-                       % used ONLY by DownSampleFeature.m
-learn_crf       = 0;   % NOT USED. Set to 0
+% The output has been taken argmax already (e.g., coco dataset). 
+% assume the argmax takes C-convention (i.e., start from 0)
+is_argmax_taken = false;
 
-is_mat          = 1;   % the results to be evaluated are saved as mat (1) or png (0)
-has_postprocess = 0;   % has done densecrf post processing (1) or not (0)
-is_argmax       = 0;   % the output has been taken argmax already (e.g., coco dataset). 
-                       % assume the argmax takes C-convention (i.e., start from 0)
+%% Model
+model_name = 'deeplab_largeFOV';
+feature_name = 'features2';
+feature_type = 'crf'; % fc8 / crf
 
-debug           = 0;   % if debug, show some results
-
+% Models and parameters:
 % vgg128_noup (not optimized well), aka DeepLab
 % bi_w = 5, bi_x_std = 50, bi_r_std = 10
 
@@ -33,7 +36,6 @@ debug           = 0;   % if debug, show some results
 % erode_gt/bboxErode20
 % bi_w = 45, bi_x_std = 37, bi_r_std = 3, pos_w = 15, pos_x_std = 3
  
-
 %
 % initial or default values for crf
 bi_w           = 5; 
@@ -44,21 +46,7 @@ pos_w          = 3;
 pos_x_std      = 3;
 
 
-%
-dataset    = 'voc12';  %'voc12', 'coco'
-trainset   = 'train_aug';      % not used
-testset    = 'val';            %'val', 'test'
-
-model_name = 'vgg128_noup';
-
-feature_name = 'features';
-feature_type = 'fc8'; % fc8 / crf
-
-id           = 'comp6';
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% used for cross-validation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 rng(10)
 
 % downsampling files for cross-validation
@@ -74,4 +62,27 @@ range_bi_w = [5];
 range_bi_x_std = [49];
 range_bi_r_std = [4 5];
 
+%% Pathes
+colormap_path = fullfile('./pascal_seg_colormap.mat');
+fprintf('Loading colormap from %s\n', colormap_path);
+load(colormap_path);
 
+dataset_dir = fullfile('', 'VOC2012');
+dataset_images_dir = fullfile(dataset_dir, 'JPEGImages');
+gt_dir = fullfile(dataset_dir, 'SegmentationClassAug');
+
+exper_dir = fullfile('Z:\Semantic Segmentation\Results\');
+if (is_mat == true)
+    net_output_mat_dir = fullfile(exper_dir, '');
+end
+
+if (is_denseCRF_done == true)
+    %.bin files directory
+    denseCRF_results_dir = sprintf('post_densecrf_W%d_XStd%d_RStd%d_PosW%d_PosXStd%d', bi_w, bi_x_std, bi_r_std, pos_w, pos_x_std);
+else
+    denseCRF_results_dir = '';
+end
+
+results_dir = fullfile(exper_dir, denseCRF_results_dir);
+
+VOC_opts = GetVOCopts(dataset_dir, results_dir, trainset, testset, 'VOC2012');
