@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# ATTENTION: you need to put this script to `exper` directory
-# at the same level as ${DATASET} folder exists
-
 # export MATIO library to run denseCRF
 DEPENDENCIES_DIR=${HOME}/Documents/dependencies
 MATIO_LIBRARY_DIR=${DEPENDENCIES_DIR}/matio-1.5.2/matio/lib
@@ -15,7 +12,6 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HDF5_LIBRARY_DIR}
 # or use the densecrf_layer (wrapper) in Caffe
 ###########################################
 DATASET=voc12          #voc12, coco
-LOAD_MAT_FILE=1
 
 MODEL_NAME=deeplab_largeFOV
 TEST_SET=test           #val, test
@@ -24,7 +20,7 @@ TEST_SET=test           #val, test
 # the features2 folder save the features computed via the model trained with the trainval set
 FEATURE_NAME=features2 #features, features2
 
-# specify the parameters
+# specify the DenseCRF parameters
 MAX_ITER=10
 
 Bi_W=5
@@ -38,7 +34,6 @@ POS_W=3
 POS_X_STD=3
 POS_Y_STD=3
 
-
 #######################################
 # MODIFY THE PATH FOR YOUR SETTING
 #######################################
@@ -49,27 +44,18 @@ echo "SAVE TO ${SAVE_DIR}"
 
 CRF_DIR=${EXP_DIR}/../../ITLab-Vision-deeplab-build/densecrf
 
-if [ ${DATASET} == "voc12" ]
-then
+if [ ${DATASET} == "voc12" ]; then
     IMG_DIR_NAME=/common/itlab-vision-shared/pascal/pascal2012devkit
-elif [ ${DATASET} == "coco" ]
-then
+elif [ ${DATASET} == "coco" ]; then
     IMG_DIR_NAME=coco
 fi
 
 # NOTE THAT the densecrf code only loads ppm images
 IMG_DIR=${IMG_DIR_NAME}/PPMImages
 
-if [ ${LOAD_MAT_FILE} == 1 ]
-then
-    # the features are saved in .mat format
-    CRF_BIN=${CRF_DIR}/prog_refine_pascal_v4
-    FEATURE_DIR=${EXP_DIR}/${DATASET}/${FEATURE_NAME}/${MODEL_NAME}/${TEST_SET}/fc8
-else
-    # the features are saved in .bin format (has called SaveMatAsBin.m in the densecrf/my_script)
-    CRF_BIN=${CRF_DIR}/prog_refine_pascal
-    FEATURE_DIR=${EXP_DIR}/${DATASET}/${FEATURE_NAME}/${MODEL_NAME}/${TEST_SET}/fc8/bin
-fi
+# the features are saved in .mat format
+CRF_BIN=${CRF_DIR}/prog_refine_pascal_v4
+FEATURE_DIR=${EXP_DIR}/${DATASET}/${FEATURE_NAME}/${MODEL_NAME}/${TEST_SET}/fc8
 
 mkdir -p ${SAVE_DIR}
 
