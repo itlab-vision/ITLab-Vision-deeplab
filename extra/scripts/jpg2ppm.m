@@ -1,3 +1,6 @@
+% function [] = jpg2ppm(dataset_dir)
+%
+% dataset_dir - directory containing folder with .jpg-images
 function [] = jpg2ppm(dataset_dir)
 
 img_folder = [dataset_dir, '/JPEGImages'];

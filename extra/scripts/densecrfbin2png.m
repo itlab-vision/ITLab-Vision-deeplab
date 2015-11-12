@@ -1,3 +1,8 @@
+% function [] = densecrfbin2png(map_folder, img_dir, color_map_file)
+%
+% map_folder     - directory containing .bin-files (denseCRF output files)
+% img_dir        - output directory for saving .png-images
+% color_map_file - PASCAL color map (pascal_segm_colormap.mat)
 function [] = densecrfbin2png(map_folder, img_dir, color_map_file)
 
 map_files = dir(fullfile(map_folder, '*.bin'));
