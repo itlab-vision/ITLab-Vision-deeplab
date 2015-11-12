@@ -9,14 +9,14 @@ CUDA_LIBS_DIR=/common/cuda-6.5/lib64
 
 # general parameters
 SCRIPTS_DIR=${PWD}
-DEST_DIR=${SCRIPTS_DIR}/../..
+DEST_DIR=${SCRIPTS_DIR}/..
 DATASET=voc12
 NET_ID=deeplab_largeFOV
 DATA_ROOT=/common/itlab-vision-shared/pascal/pascal2012devkit
 
 # parameters for run_pascal.sh
-CAFFE_DIR=../../src/caffe
-CAFFE_BIN=../../../ITLab-Vision-deeplab-build/tools/caffe
+CAFFE_DIR=${SCRIPTS_DIR}/../src/caffe
+CAFFE_BIN=${SCRIPTS_DIR}/../../ITLab-Vision-deeplab-build/tools/caffe
 NUM_LABELS=21
 TRAIN_SET_SUFFIX=_aug
 TRAIN_SET_STRONG=train
