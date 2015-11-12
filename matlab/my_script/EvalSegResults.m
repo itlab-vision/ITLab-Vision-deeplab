@@ -1,5 +1,5 @@
 % Script allows easily get results of segmentation
-SetupEnv2;
+SetupEnv;
 
 fprintf('Saving to %s\n', results_dir);
 if (exist(results_dir, 7) == false)
