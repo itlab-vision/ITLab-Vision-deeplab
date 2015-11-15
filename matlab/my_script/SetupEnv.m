@@ -7,8 +7,9 @@ trainset   = 'trainval';
 testset    = 'val';            %'val', 'test'
 
 %% Completed steps
-is_mat = false;
-is_denseCRF_done = true;
+feature_name = 'features2';
+feature_type = 'crf'; % fc8 / crf
+feature_is_png = true;
 
 % The output has been taken argmax already (e.g., coco dataset). 
 % assume the argmax takes C-convention (i.e., start from 0)
@@ -16,8 +17,6 @@ is_argmax_taken = false;
 
 %% Model
 model_name = 'deeplab_largeFOV';
-feature_name = 'features2';
-feature_type = 'crf'; % fc8 / crf
 
 % Models and parameters:
 % vgg128_noup (not optimized well), aka DeepLab
@@ -47,7 +46,7 @@ pos_x_std      = 3;
 
 
 %% used for cross-validation
-rng(10)
+%rng(10)
 
 % downsampling files for cross-validation
 down_sample_method = 2;      % 1: equally sample with "down_sample_rate", 2: randomly pick "num_sample" samples
@@ -63,26 +62,16 @@ range_bi_x_std = [49];
 range_bi_r_std = [4 5];
 
 %% Pathes
-colormap_path = fullfile('./pascal_seg_colormap.mat');
+colormap_path = fullfile('pascal_seg_colormap.mat');
 fprintf('Loading colormap from %s\n', colormap_path);
 load(colormap_path);
 
-dataset_dir = fullfile('', 'VOC2012');
+dataset_dir = fullfile('Z:\Semantic segmentation\Datasets\pascal2012devkit');
 dataset_images_dir = fullfile(dataset_dir, 'JPEGImages');
-gt_dir = fullfile(dataset_dir, 'SegmentationClassAug');
+gt_dir = fullfile('C:\Programming\CProjects\nnsu\datasets\voc2012\SegmentationAug');
 
-exper_dir = fullfile('Z:\Semantic Segmentation\Results\');
-if (is_mat == true)
-    net_output_mat_dir = fullfile(exper_dir, '');
-end
+exper_dir      = fullfile('Z:\Semantic Segmentation');
+output_dir     = fullfile(exper_dir, 'Results', model_name, [feature_type, '_', testset]);
+output_png_dir = fullfile(output_dir, 'png');
 
-if (is_denseCRF_done == true)
-    %.bin files directory
-    denseCRF_results_dir = sprintf('post_densecrf_W%d_XStd%d_RStd%d_PosW%d_PosXStd%d', bi_w, bi_x_std, bi_r_std, pos_w, pos_x_std);
-else
-    denseCRF_results_dir = '';
-end
-
-results_dir = fullfile(exper_dir, denseCRF_results_dir);
-
-VOC_opts = GetVOCopts(dataset_dir, results_dir, trainset, testset, 'VOC2012');
+VOC_opts = GetVOCopts(dataset_dir, output_png_dir, trainset, testset, 'VOC2012');
