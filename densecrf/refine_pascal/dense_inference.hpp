@@ -32,25 +32,9 @@
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdio>
-#include <iostream>
-#include <cassert>
-#include <cmath>
-#include <cstdlib>
 #include <cstring>
-#include <vector>
-#include <fstream>
-#include <utility>
-#include <exception>
-
-#include <dirent.h>
-#include <fileNamematch.h>
-
-#include "matio.h"
-
-#include "../libDenseCRF/densecrf.h"
-#include "../libDenseCRF/util.h"
-#include "../util/Timer.h"
+#include <exception>        
+#include <iostream>
 
 
 class exception : public std::exception {
@@ -63,9 +47,9 @@ public:
         message(std::move(message))
     {}
 
-    virtual ~exception() {}
+    virtual ~exception() throw() {}
 
-    virtual const char* what() const override {
+    virtual const char* what() const throw() {
         return message.c_str();
     }
 private:
@@ -88,26 +72,10 @@ public:
     float bilateralGStd;
     float bilateralBStd;
 
-    InputData() :
-        imageDir(),
-        featureDir(),
-        outputDir(),
-
-        maxIterations(10),
-
-        posW   (3),
-        posXStd(3),
-        posYStd(3),
-        bilateralW   (5),
-        bilateralXStd(70),
-        bilateralYStd(70),
-        bilateralRStd(5),
-        bilateralGStd(5),
-        bilateralBStd(5)
-    {}
-
     InputData(int argc, char** argv);
 
+private:
+    void init();
 };
 
 std::ostream& operator<<(std::ostream& os, const InputData& data);
