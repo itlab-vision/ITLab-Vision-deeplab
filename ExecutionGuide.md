@@ -3,7 +3,7 @@ General approach to execution is a set of scripts since there are a lot of param
  - ``` extra/scripts/run_pascal.sh ```
  - ``` extra/scripts/run_densecrf.sh ```
 
-So, if you want to execute Deeplab, you need to set up these scripts accordingly to your configuration. <br/><br/>
+So, if you want to execute Deeplab, you need to set up these scripts respectively to your configuration. <br/><br/>
 
 
 1. Set variable __DEST_DIR__ in extra/scripts/deploy.sh as you need to and run that script.
