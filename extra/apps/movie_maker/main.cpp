@@ -77,8 +77,8 @@ void MovieMaker::preprocessImage(cv::Mat& image) {
 		}
 
 		cv::Mat resized = cv::Mat::zeros(frameHeight, frameWidth, image.type());
-		image(cv::Range(0, std::min(image.rows, frameWidth)), 
-			    cv::Range(0, std::min(image.cols, frameHeight))
+		image(cv::Range(0, std::min(image.rows, frameHeight)), 
+			    cv::Range(0, std::min(image.cols, frameWidth))
 			).copyTo(resized);
 		image = resized;
 	}
