@@ -1,7 +1,13 @@
-% function [] = jpg2ppm(dataset_dir)
-%
-% dataset_dir - directory containing folder with .jpg-images
+% function [] = jpeg2ppm(input_dir, output_dir)
+
 function [] = jpeg2ppm(input_dir, output_dir)
+
+if (exist(input_dir, 'dir') == 0)
+	error('Failed to open a dir: "%s"', input_dir);
+end
+if (exist(output_dir, 'dir') == 0) 
+	mkdir(output_dir);
+end
 
 img_dir = dir(fullfile(input_dir, '*.jpg'));
 

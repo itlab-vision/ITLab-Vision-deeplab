@@ -1,48 +1,50 @@
-%VOCopts = GetVOCopts(seg_root, seg_res_dir, trainset, testset, dataset)
-% devkit_root_dir - where the dataset is placed
-% results_dir - where is results (png)
+%VOCopts = GetVOCopts(seg_root, results_dir, trainset, testset, dataset)
+% devkit_root_dir            - directory of the dataset
+% results_dir                - directory of your results
 % trainset, testset, dataset - your experiment configuration
 
 function VOCopts = GetVOCopts(devkit_root_dir, results_dir, trainset, testset, dataset)
-VOCopts.dataset = dataset;
+VOCopts.dataset  = dataset;
 VOCopts.trainset = trainset;
-VOCopts.testset = testset;
+VOCopts.testset  = testset;
 
 VOCopts.datadir = strrep(fullfile(devkit_root_dir), '\', '/');
-VOCopts.resdir = strrep(results_dir, '\', '/');
+VOCopts.resdir  = strrep(fullfile(results_dir), '\', '/');
 
 % initialize main challenge paths
-VOCopts.annopath = strrep(fullfile(VOCopts.datadir, '/Annotations/%s.xml'), '\', '/');
-VOCopts.imgpath = strrep(fullfile(VOCopts.datadir, '/JPEGImages/%s.jpg'), '\', '/');
-VOCopts.imgsetpath = strrep(fullfile(VOCopts.datadir, '/ImageSets/Main/%s.txt'), '\', '/');
-VOCopts.clsimgsetpath = strrep(fullfile(VOCopts.datadir, '/ImageSets/Main/%s_%s.txt'), '\', '/');
+VOCopts.annopath      = [VOCopts.datadir '/Annotations/%s.xml'];
+VOCopts.imgpath       = [VOCopts.datadir '/JPEGImages/%s.jpg'];
+VOCopts.imgsetpath    = [VOCopts.datadir '/ImageSets/Main/%s.txt'];
+VOCopts.clsimgsetpath = [VOCopts.datadir '/ImageSets/Main/%s_%s.txt'];
 
-VOCopts.clsrespath = strrep(fullfile(VOCopts.resdir, ['Main/%s_cls_', testset, '_%s.txt']), '\', '/');
-VOCopts.detrespath = strrep(fullfile(VOCopts.resdir, ['Main/%s_det_', testset ,'_%s.txt']), '\', '/');
+VOCopts.clsrespath    = [VOCopts.resdir '/Main/%s_cls_' testset '_%s.txt'];
+VOCopts.detrespath    = [VOCopts.resdir '/Main/%s_det_' testset '_%s.txt'];
 
 % initialize segmentation task paths
-VOCopts.seg.clsimgpath = [VOCopts.datadir '/SegmentationClass/%s.png'];
+VOCopts.seg.clsimgpath  = [VOCopts.datadir '/SegmentationClass/%s.png'];
 
-VOCopts.seg.instimgpath=[VOCopts.datadir '/SegmentationObject/%s.png'];
-VOCopts.seg.imgsetpath=[VOCopts.datadir '/ImageSets/Segmentation/%s.txt'];
+VOCopts.seg.instimgpath = [VOCopts.datadir '/SegmentationObject/%s.png'];
+VOCopts.seg.imgsetpath  = [VOCopts.datadir '/ImageSets/Segmentation/%s.txt'];
 
-VOCopts.seg.clsresdir=[VOCopts.resdir 'Segmentation/%s_%s_cls'];
-VOCopts.seg.instresdir=[VOCopts.resdir 'Segmentation/%s_%s_inst'];
-VOCopts.seg.clsrespath=[VOCopts.seg.clsresdir '/%s.png'];
-VOCopts.seg.instrespath=[VOCopts.seg.instresdir '/%s.png'];
+VOCopts.seg.clsresdir   = [VOCopts.resdir '/Segmentation/%s_%s_cls'];
+VOCopts.seg.instresdir  = [VOCopts.resdir '/Segmentation/%s_%s_inst'];
+VOCopts.seg.clsrespath  = [VOCopts.seg.clsresdir '/%s.png'];
+VOCopts.seg.instrespath = [VOCopts.seg.instresdir '/%s.png'];
 
 % initialize layout task paths
 
-VOCopts.layout.imgsetpath=[VOCopts.datadir VOCopts.dataset '/ImageSets/Layout/%s.txt'];
-VOCopts.layout.respath=[VOCopts.resdir 'Layout/%s_layout_' VOCopts.testset '.xml'];
+VOCopts.layout.imgsetpath = [VOCopts.datadir VOCopts.dataset '/ImageSets/Layout/%s.txt'];
+VOCopts.layout.respath    = [VOCopts.resdir '/Layout/%s_layout_' VOCopts.testset '.xml'];
 
 % initialize action task paths
 
-VOCopts.action.imgsetpath=[VOCopts.datadir VOCopts.dataset '/ImageSets/Action/%s.txt'];
-VOCopts.action.clsimgsetpath=[VOCopts.datadir VOCopts.dataset '/ImageSets/Action/%s_%s.txt'];
-VOCopts.action.respath=[VOCopts.resdir 'Action/%s_action_' VOCopts.testset '_%s.txt'];
+VOCopts.action.imgsetpath    = [VOCopts.datadir VOCopts.dataset '/ImageSets/Action/%s.txt'];
+VOCopts.action.clsimgsetpath = [VOCopts.datadir VOCopts.dataset '/ImageSets/Action/%s_%s.txt'];
+VOCopts.action.respath       = [VOCopts.resdir '/Action/%s_action_' VOCopts.testset '_%s.txt'];
 
 % initialize the VOC challenge options
+
+VOCopts.comp = 'comp6';
 
 % classes
 

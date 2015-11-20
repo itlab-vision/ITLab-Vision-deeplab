@@ -13,7 +13,7 @@
 function [accuracies, avacc, conf, rawcounts] = MyVOCevalseg(VOCopts)
 
 % image test set
-[gtIDs, t] = textread(sprintf(VOCopts.seg.imgsetpath, VOCopts.testset), '%s %d');
+[gtIDs, ~] = textread(sprintf(VOCopts.seg.imgsetpath, VOCopts.testset), '%s %d');
 
 % number of labels = number of classes plus one for the background
 classCount = VOCopts.nclasses + 1; 
@@ -35,13 +35,13 @@ for i = 1 : length(gtIDs)
     
     % ground truth label file
     gtFile = sprintf(VOCopts.seg.clsimgpath, imageName);
-    [gtImage, map] = imread(gtFile);    
+    [gtImage, ~] = imread(gtFile);    
     gtImage = double(gtImage);
     
     % results file
     resultsFile = sprintf(VOCopts.seg.clsrespath, VOCopts.testset, imageName);
     try
-      [resultingImage, map] = imread(resultsFile);
+      [resultingImage, ~] = imread(resultsFile);
     catch err
       missingImagesCount = missingImagesCount + 1;
       fprintf('Failed to read %s\n', resultsFile);

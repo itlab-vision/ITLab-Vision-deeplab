@@ -1,15 +1,24 @@
 % function CropImages(input_dir, output_dir, output_size)
 % input_dir
 % output_dir
-% output_size
+% output_size - needed [rows cols] of output images
 
 function cropImages(input_dir, output_dir, output_size)
 
+if (exist(input_dir, 'dir') == 0)
+   error('Failed to open a dir: "%s"', input_dir);
+end
+if (exist(output_dir, 'dir') == 0) 
+   mkdir(output_dir);
+end
+
 list = dir(input_dir);
+
 for i = 1 : numel(list),
    if (list(i).isdir == true) 
        continue;
    end
+
    path = fullfile(input_dir, list(i).name);
    fprintf('Processing image: "%s"...\n', path);
    img = imread(path);

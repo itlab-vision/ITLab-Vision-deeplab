@@ -9,14 +9,14 @@ testset    = 'val';            %'val', 'test'
 %% Completed steps
 feature_name = 'features2';
 feature_type = 'crf'; % fc8 / crf
-feature_is_png = true;
+feature_is_png = false;
 
 % The output has been taken argmax already (e.g., coco dataset). 
 % assume the argmax takes C-convention (i.e., start from 0)
 is_argmax_taken = false;
 
 %% Model
-model_name = 'deeplab_largeFOV';
+model_name = 'deeplab_MSc_largeFOV';
 
 % Models and parameters:
 % vgg128_noup (not optimized well), aka DeepLab
@@ -66,9 +66,9 @@ colormap_path = fullfile('pascal_seg_colormap.mat');
 fprintf('Loading colormap from %s\n', colormap_path);
 load(colormap_path);
 
-dataset_dir = fullfile('Z:\Semantic segmentation\Datasets\pascal2012devkit');
+dataset_dir = fullfile('voc2012devkit');
 dataset_images_dir = fullfile(dataset_dir, 'JPEGImages');
-gt_dir = fullfile('C:\Programming\CProjects\nnsu\datasets\voc2012\SegmentationAug');
+gt_dir = fullfile('SegmentationAug');
 
 exper_dir      = fullfile('Z:\Semantic Segmentation');
 output_dir     = fullfile(exper_dir, 'Results', model_name, [feature_type, '_', testset]);

@@ -1,4 +1,4 @@
-% Script allows easily get results of segmentation
+% Script enables to easily get results of segmentation
 SetupEnv;
 
 % Convert results to png

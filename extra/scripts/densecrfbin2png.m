@@ -3,9 +3,13 @@
 % map_folder     - directory containing .bin-files (denseCRF output files)
 % color_map_file - PASCAL color map (pascal_segm_colormap.mat)
 % png_dir        - output directory for saving .png-images
+
 function [] = densecrfbin2png(map_folder, color_map_file, png_dir)
 
-if (exist(png_dir, 'dir') == false)
+if (exist(map_folder, 'dir') == 0)
+    error('Failed to open a dir: "%s"', map_folder);
+end
+if (exist(png_dir, 'dir') == 0)
     mkdir(png_dir);
 end
 
