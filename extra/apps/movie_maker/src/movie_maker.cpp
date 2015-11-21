@@ -1,4 +1,6 @@
 #include "movie_maker.hpp"
+#include "exception.hpp"
+
 
 void MovieMaker::createVideo(std::istream& list,
     const std::string& outputFileName)
@@ -9,9 +11,10 @@ void MovieMaker::createVideo(std::istream& list,
         outputFileName.substr(outputFileName.rfind('.')).c_str());
     std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
     if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
-        cv::Size(frameWidth, frameHeight)) == false)
+                         cv::Size(frameWidth, frameHeight)
+                        ) == false)
     {
-        throw std::exception("Failed to open file for video writing.");
+        throw exception("Failed to open file for video writing.");
     }
 
     size_t count = 0;
@@ -34,20 +37,21 @@ void MovieMaker::createVideo(std::istream& list,
     std::cout << "Total frames written: " << count << std::endl;
 }
 
-void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
-            const std::string& outputFileName)
+void MovieMaker::createVideo(const std::vector<std::vector<std::string> > &imagesSet,
+            const std::string &outputFileName)
 {    
     if (imagesSet.size() == 0)
     {
-        throw std::exception("List of image sets is empty.");
+        throw exception("List of image sets is empty.");
     }
     
-    int kSets = imagesSet.size();
-    for (int i = 0; i < kSets - 1; i++)
+    const size_t kSets = imagesSet.size();
+    const size_t kImages = imagesSet[0].size();
+    for (size_t i = 0; i < kSets; i++)
     {
-        if (imagesSet[i].size() != imagesSet[i + 1].size())
+        if (imagesSet[i].size() != kImages)
         {
-            throw std::exception("Sets of images should have the same size.");
+            throw exception("Sets of images should have the same size.");
         }
     }
 
@@ -57,20 +61,19 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
         outputFileName.substr(outputFileName.rfind('.')).c_str());
     std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
     if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
-            cv::Size(frameWidth, frameHeight)) == false)
+                         cv::Size(frameWidth, frameHeight)
+                        ) == false)
     {
-        throw std::exception("Failed to open file for video writing.");
+        throw exception("Failed to open file for video writing.");
     }
 
-    size_t count = 0;
-    int kImages = imagesSet[0].size();
-    int idx = 0;
-    while (idx < kImages)
+    size_t count = 0;    
+    for (size_t idx = 0; idx < kImages; idx++)
     {
         std::vector<cv::Mat> images;
-        for (int i = 0; i < kSets; i++)
+        for (size_t i = 0; i < kSets; i++)
         {
-            std::string fileName = imagesSet[i][idx];
+            const std::string& fileName = imagesSet[i][idx];
             cv::Mat image = cv::imread(fileName);
             images.push_back(image);
         }
@@ -79,12 +82,11 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
         mergeImages(images, frame);
         preprocessImage(frame);
         
-        for(int i = 0; i < frameRepeat; ++i)
+        for (int i = 0; i < frameRepeat; ++i)
         {
             videoWriter << frame;
         }
         count += frameRepeat;
-        idx++;
     }
     videoWriter.release();
 
@@ -96,23 +98,26 @@ void MovieMaker::mergeImages(const std::vector<cv::Mat> &images,
 {
     if (images.size() == 0)
     {
-        throw std::exception("List of image sets is empty.");
+        throw exception("List of image sets is empty.");
     }
-    int frameWidth = 0, frameHeight = 0, kImages = images.size(),
-        frameType = images[0].type();
-    for (int i = 0; i < kImages; i++)
+    const size_t kImages = images.size();
+    const int frameType = images[0].type();
+
+    int frameWidth = 0, frameHeight = 0;
+    for (size_t i = 0; i < kImages; i++)
     {
         frameWidth += images[i].cols;
-        if (images[i].rows > frameHeight)
+        if (frameHeight < images[i].rows)
         {
             frameHeight = images[i].rows;
         }
     }
+
     frame.create(frameHeight, frameWidth, frameType);
     cv::Rect roi;
     roi.x = 0;
     roi.y = 0;
-    for (int i = 0; i < kImages; i++)
+    for (size_t i = 0; i < kImages; i++)
     {
         roi.width = images[i].cols;
         roi.height = images[i].rows;
@@ -130,9 +135,9 @@ void MovieMaker::preprocessImage(cv::Mat& image)
     }
 
     float scale, scaleOx = 1.0f, scaleOy = 1.0f;
-    scaleOx = (image.cols > frameWidth) ? 
+    scaleOx = (frameWidth < image.cols) ? 
               frameWidth / ((float)image.cols) : scaleOx;
-    scaleOy = (image.rows > frameHeight) ? 
+    scaleOy = (frameHeight < image.rows) ? 
               frameHeight / ((float)image.rows) : scaleOy;
     scale = (scaleOx > scaleOy) ? scaleOy : scaleOx;
 
