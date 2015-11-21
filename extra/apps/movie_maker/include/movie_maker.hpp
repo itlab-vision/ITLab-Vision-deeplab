@@ -8,7 +8,8 @@
 #include "opencv2\highgui\highgui.hpp"
 #include "opencv2\video\video.hpp"
 
-class MovieMaker {
+class MovieMaker
+{
 public:
     MovieMaker(int frameWidth, int frameHeight,
                int frameRepeat = 1, int fps = 30) :
