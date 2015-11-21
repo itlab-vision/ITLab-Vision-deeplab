@@ -10,23 +10,23 @@
 
 class MovieMaker {
 public:
-	MovieMaker(int frameWidth, int frameHeight,
+    MovieMaker(int frameWidth, int frameHeight,
                int frameRepeat = 1, int fps = 30) :
-		frameWidth(frameWidth), frameHeight(frameHeight),
+        frameWidth(frameWidth), frameHeight(frameHeight),
         frameRepeat(frameRepeat), fps(fps)
-	{}
+    {}
 
-	void createVideo(std::istream& list, const std::string& outputFileName);
+    void createVideo(std::istream& list, const std::string& outputFileName);
     void createVideo(std::vector<std::vector<std::string> > &imagesSet,
             const std::string& outputFileName);
 private:
-	int frameWidth;
-	int frameHeight;
-	int frameRepeat;
-	int fps;
+    int frameWidth;
+    int frameHeight;
+    int frameRepeat;
+    int fps;
 
     void mergeImages(const std::vector<cv::Mat> &images, cv::Mat &frame);
-	void preprocessImage(cv::Mat& image);
+    void preprocessImage(cv::Mat& image);
 };
 
 #endif

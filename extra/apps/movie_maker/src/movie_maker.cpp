@@ -3,35 +3,35 @@
 void MovieMaker::createVideo(std::istream& list,
     const std::string& outputFileName)
 {
-	cv::VideoWriter videoWriter;
+    cv::VideoWriter videoWriter;
 
-	std::string tempFile = cv::tempfile(
+    std::string tempFile = cv::tempfile(
         outputFileName.substr(outputFileName.rfind('.')).c_str());
-	std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
-	if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
+    std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
+    if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
         cv::Size(frameWidth, frameHeight)) == false)
     {
-		throw std::exception("Failed to open file for video writing.");
-	}
+        throw std::exception("Failed to open file for video writing.");
+    }
 
-	size_t count = 0;
-	while (list.good() == true)
+    size_t count = 0;
+    while (list.good() == true)
     {
-		std::string fileName;
-		std::getline(list, fileName);
+        std::string fileName;
+        std::getline(list, fileName);
 
-		cv::Mat image = cv::imread(fileName);
-		preprocessImage(image);
+        cv::Mat image = cv::imread(fileName);
+        preprocessImage(image);
 
-		for(int i = 0; i < frameRepeat; ++i)
+        for(int i = 0; i < frameRepeat; ++i)
         {
-			videoWriter.write(image);
-		}
-		count += frameRepeat;
-	}
-	videoWriter.release();
+            videoWriter.write(image);
+        }
+        count += frameRepeat;
+    }
+    videoWriter.release();
 
-	std::cout << "Total frames written: " << count << std::endl;
+    std::cout << "Total frames written: " << count << std::endl;
 }
 
 void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
@@ -44,43 +44,43 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
 
     cv::VideoWriter videoWriter;
 
-	std::string tempFile = cv::tempfile(
+    std::string tempFile = cv::tempfile(
         outputFileName.substr(outputFileName.rfind('.')).c_str());
-	std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
-	if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
+    std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
+    if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
             cv::Size(frameWidth, frameHeight)) == false)
     {
-		throw std::exception("Failed to open file for video writing.");
-	}
+        throw std::exception("Failed to open file for video writing.");
+    }
 
-	size_t count = 0;
+    size_t count = 0;
     int kSets = imagesSet.size();
     int kImages = imagesSet[0].size();
     int idx = 0;
-	while (idx < kImages)
+    while (idx < kImages)
     {
-		std::vector<cv::Mat> images;
+        std::vector<cv::Mat> images;
         for (int i = 0; i < kSets; i++)
         {
             std::string fileName = imagesSet[i][idx];
             cv::Mat image = cv::imread(fileName);
             images.push_back(image);
         }
-		
+        
         cv::Mat frame;
         mergeImages(images, frame);
-		preprocessImage(frame);
+        preprocessImage(frame);
         
-		for(int i = 0; i < frameRepeat; ++i)
+        for(int i = 0; i < frameRepeat; ++i)
         {
-			videoWriter << frame;
-		}
-		count += frameRepeat;
+            videoWriter << frame;
+        }
+        count += frameRepeat;
         idx++;
-	}
+    }
     videoWriter.release();
 
-	std::cout << "Total frames written: " << count << std::endl;
+    std::cout << "Total frames written: " << count << std::endl;
 }
 
 void MovieMaker::mergeImages(const std::vector<cv::Mat> &images,
@@ -128,7 +128,7 @@ void MovieMaker::preprocessImage(cv::Mat& image)
               frameHeight / ((float)image.rows) : scaleOy;
     scale = (scaleOx > scaleOy) ? scaleOy : scaleOx;
 
-	cv::Mat resized;
+    cv::Mat resized;
     cv::resize(image, resized, cv::Size(), scale, scale);
-	image = resized;
+    image = resized;
 }
