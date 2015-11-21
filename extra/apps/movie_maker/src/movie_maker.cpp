@@ -45,7 +45,7 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
     int kSets = imagesSet.size();
     for (int i = 0; i < kSets - 1; i++)
     {
-        if (imagesSet[i] != imagesSet[i + 1])
+        if (imagesSet[i].size() != imagesSet[i + 1].size())
         {
             throw std::exception("Sets of images should have the same size.");
         }
