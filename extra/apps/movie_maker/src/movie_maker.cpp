@@ -36,10 +36,19 @@ void MovieMaker::createVideo(std::istream& list,
 
 void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
             const std::string& outputFileName)
-{
+{    
     if (imagesSet.size() == 0)
     {
         throw std::exception("List of image sets is empty.");
+    }
+    
+    int kSets = imagesSet.size();
+    for (int i = 0; i < kSets - 1; i++)
+    {
+        if (imagesSet[i] != imagesSet[i - 1])
+        {
+            throw std::exception("Sets of images should have the same size.");
+        }
     }
 
     cv::VideoWriter videoWriter;
@@ -54,7 +63,6 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
     }
 
     size_t count = 0;
-    int kSets = imagesSet.size();
     int kImages = imagesSet[0].size();
     int idx = 0;
     while (idx < kImages)
