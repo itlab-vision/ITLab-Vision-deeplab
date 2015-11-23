@@ -1,4 +1,5 @@
 #include "movie_maker.hpp"
+#include "exception.hpp"
 
 void MovieMaker::createVideo(std::istream& list,
     const std::string& outputFileName)
@@ -11,7 +12,7 @@ void MovieMaker::createVideo(std::istream& list,
     if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
         cv::Size(frameWidth, frameHeight)) == false)
     {
-        throw std::exception("Failed to open file for video writing.");
+        throw exception("Failed to open file for video writing.");
     }
 
     size_t count = 0;
@@ -48,16 +49,17 @@ bool MovieMaker::checkSizeImagesSet(
     return true;
 }
 
-void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
-            const std::string& outputFileName)
+void MovieMaker::createVideo(
+        const std::vector<std::vector<std::string> > &imagesSet,
+        const std::string& outputFileName)
 {    
     if (imagesSet.size() == 0)
     {
-        throw std::exception("List of image sets is empty.");
+        throw exception("List of image sets is empty.");
     }  
     if (!checkSizeImagesSet(imagesSet))
     {
-        throw std::exception("Sets of images should have the same size.");
+        throw exception("Sets of images should have the same size.");
     }
 
     cv::Mat legend;
@@ -91,7 +93,7 @@ void MovieMaker::createVideo(std::vector<std::vector<std::string> > &imagesSet,
         cv::Size(frame.cols, frame.rows));
     if (!videoWriter.isOpened())
     {
-        throw std::exception("Failed to open file for video writing.");
+        throw exception("Failed to open file for video writing.");
     }
     for(int i = 0; i < frameRepeat; ++i)
     {
@@ -137,7 +139,7 @@ void MovieMaker::mergeImages(const std::vector<cv::Mat> &images,
 {
     if (images.size() == 0)
     {
-        throw std::exception("List of image sets is empty.");
+        throw exception("List of image sets is empty.");
     }
     int frameWidth = 0, frameHeight = 0, kImages = images.size(),
         frameType = images[0].type();

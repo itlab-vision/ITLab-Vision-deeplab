@@ -53,9 +53,9 @@ int main(int argc, char* argv[])
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
-    Utilities::GetFilesInFolder(imgsDir, images);
-    Utilities::GetFilesInFolder(segmImgsDir, segmImages);
-    Utilities::GetFilesInFolder(dcrfSegmImgsDir, dcrfSegmImages);
+    Utilities::GetFilesInFolder(imgsDir, "*.jpg", images);
+    Utilities::GetFilesInFolder(segmImgsDir, "*.jpg", segmImages);
+    Utilities::GetFilesInFolder(dcrfSegmImgsDir, "*.jpg", dcrfSegmImages);
     std::vector<std::vector<std::string> > imgsSet;
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);

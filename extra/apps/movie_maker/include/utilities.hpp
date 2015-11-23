@@ -8,7 +8,8 @@
 class Utilities
 {
 public:
-static void GetFilesInFolder(const std::string& dirName, 
+static void GetFilesInFolder(const std::string& dirName,
+                const std::string &mask,
                 std::vector<std::string> &filesList);
 };
 

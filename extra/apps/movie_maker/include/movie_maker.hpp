@@ -18,7 +18,7 @@ public:
     {}
 
     void createVideo(std::istream& list, const std::string& outputFileName);
-    void createVideo(std::vector<std::vector<std::string> > &imagesSet,
+    void createVideo(const std::vector<std::vector<std::string> > &imagesSet,
             const std::string& outputFileName);
 private:
     int frameWidth;
