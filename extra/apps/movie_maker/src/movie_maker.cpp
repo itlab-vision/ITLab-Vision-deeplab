@@ -24,7 +24,7 @@ void MovieMaker::createVideo(std::istream& list,
         cv::Mat image = cv::imread(fileName);
         preprocessImage(image);
 
-        for(int i = 0; i < frameRepeat; ++i)
+        for (int i = 0; i < frameRepeat; ++i)
         {
             videoWriter.write(image);
         }
@@ -51,7 +51,7 @@ bool MovieMaker::checkSizeImagesSet(
 
 void MovieMaker::createVideo(
         const std::vector<std::vector<std::string> > &imagesSet,
-        const std::string& outputFileName)
+        const std::string &outputFileName)
 {    
     if (imagesSet.size() == 0)
     {
@@ -122,7 +122,7 @@ void MovieMaker::createVideo(
         imgsFrame.copyTo(frame(imgsRect));
         legend.copyTo(frame(legendRect));
         
-        for(int i = 0; i < frameRepeat; ++i)
+        for (int i = 0; i < frameRepeat; ++i)
         {
             videoWriter << frame;
         }

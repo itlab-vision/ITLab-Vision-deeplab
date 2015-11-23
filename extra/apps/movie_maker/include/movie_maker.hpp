@@ -19,7 +19,7 @@ public:
 
     void createVideo(std::istream& list, const std::string& outputFileName);
     void createVideo(const std::vector<std::vector<std::string> > &imagesSet,
-            const std::string& outputFileName);
+            const std::string &outputFileName);
 private:
     int frameWidth;
     int frameHeight;
@@ -29,7 +29,7 @@ private:
     void mergeImages(const std::vector<cv::Mat> &images, cv::Mat &frame);
     bool checkSizeImagesSet(const std::vector<std::vector<std::string> > &imagesSet);
     void createVOCLegend(cv::Mat &legend);
-    void preprocessImage(cv::Mat& image);
+    void preprocessImage(cv::Mat &image);
 };
 
 #endif
