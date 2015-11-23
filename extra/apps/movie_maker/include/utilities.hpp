@@ -8,8 +8,8 @@
 class Utilities
 {
 public:
-static void GetFilesInFolder(const std::string& dirName, const std::string &pattern, 
+static void GetFilesInFolder(const std::string& dirName, 
                 std::vector<std::string> &filesList);
 };
 
-#endif // __UTILITIES_HPP__
+#endif

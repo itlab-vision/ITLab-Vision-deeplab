@@ -11,18 +11,18 @@
 #include "utilities.hpp"
 
 static const char argsDefs[] = 
-    "{ i | imgs             |      | Path to dataset images                  }"
-    "{ s | segmimgs         |      | Path to segmented images                }"
-    "{ d | dcrfsegmimgs     |      | Path to segmented images after denseCRF }"
-    "{   | fps              | 30   | Frames per second                       }"
-    "{   | fpi              | 1    | Frames per image                        }"
-    "{ o | video            |      | Resulting video name                    }"
-    "{   | width            | 400  | Output video frame width                }"
-    "{   | height           | 300  | Output video frame height               }";
+    "{ | imgs             |      | Path to target images                   }"
+    "{ | segmimgs         |      | Path to segmented images                }"
+    "{ | dcrfsegmimgs     |      | Path to segmented images after denseCRF }"
+    "{ | fps              | 30   | Frames per second                       }"
+    "{ | fpi              | 1    | Frames per image                        }"
+    "{ | video            |      | Resulting video name                    }"
+    "{ | width            | 400  | Output video frame width                }"
+    "{ | height           | 300  | Output video frame height               }";
 
 void printHelp(std::ostream& os)
 {
-    os << "\tUsage: -i path/to/jpeg -s results/net -d results/crf -o filename.avi" << std::endl
+    os << "\tUsage: --list=path/to/list.txt --video=output/filename" << std::endl
        << "\t[--fpi=<number>, --width=400, --height=300 --fps=30]" << std::endl;
 }
 
@@ -45,18 +45,18 @@ int main(int argc, char* argv[])
     auto segmImgsDir = parser.get<std::string>("segmimgs");
     auto dcrfSegmImgsDir = parser.get<std::string>("dcrfsegmimgs");
     auto videoFileName = parser.get<std::string>("video");
-    auto fpi = (parser.get<int>("fpi", false) < 1) ? 1 : parser.get<int>("fpi");
-    auto fps = (parser.get<int>("fps", false) <= 0) ? 30 : parser.get<int>("fps");    
+    auto fpi = (parser.get<int>("fpi") < 1) ? 1 : parser.get<int>("fpi");
+    auto fps = (parser.get<int>("fps") <= 0) ? 30 : parser.get<int>("fps");    
     auto frameWidth = 
-        (parser.get<int>("width", false) <= 0) ? 400 : parser.get<int>("width");
+        (parser.get<int>("width") <= 0) ? 400 : parser.get<int>("width");
     auto frameHeight = 
-        (parser.get<int>("height", false) <= 0) ? 300 : parser.get<int>("height");
+        (parser.get<int>("height") <= 0) ? 300 : parser.get<int>("height");
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
-    Utilities::GetFilesInFolder(imgsDir, "*.jpg", images);
-    Utilities::GetFilesInFolder(segmImgsDir, "*.png", segmImages);
-    Utilities::GetFilesInFolder(dcrfSegmImgsDir, "*.png", dcrfSegmImages);
+    Utilities::GetFilesInFolder(imgsDir, images);
+    Utilities::GetFilesInFolder(segmImgsDir, segmImages);
+    Utilities::GetFilesInFolder(dcrfSegmImgsDir, dcrfSegmImages);
     std::vector<std::vector<std::string> > imgsSet;
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);
