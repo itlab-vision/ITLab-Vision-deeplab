@@ -27,6 +27,8 @@ private:
     int fps;
 
     void mergeImages(const std::vector<cv::Mat> &images, cv::Mat &frame);
+    bool checkSizeImagesSet(const std::vector<std::vector<std::string> > &imagesSet);
+    void createVOCLegend(cv::Mat &legend);
     void preprocessImage(cv::Mat& image);
 };
 

@@ -17,13 +17,13 @@ static const char argsDefs[] =
     "{ | fps              | 30   | Frames per second                       }"
     "{ | fpi              | 1    | Frames per image                        }"
     "{ | video            |      | Resulting video name                    }"
-    "{ | width            | 400  | Output video frame width                }"
-    "{ | height           | 300  | Output video frame height               }";
+    "{ | width            | 1200 | Output video frame width                }"
+    "{ | height           | 600  | Output video frame height               }";
 
 void printHelp(std::ostream& os)
 {
     os << "\tUsage: --list=path/to/list.txt --video=output/filename" << std::endl
-       << "\t[--fpi=<number>, --width=400, --height=300 --fps=30]" << std::endl;
+       << "\t[--fpi=<number>, --width=1200, --height=600 --fps=30]" << std::endl;
 }
 
 namespace ReturnCode
@@ -36,7 +36,6 @@ namespace ReturnCode
     };
 }; //namespace ReturnCode
 
-
 int main(int argc, char* argv[])
 {
     // read commanl line arguments
@@ -48,9 +47,9 @@ int main(int argc, char* argv[])
     auto fpi = (parser.get<int>("fpi") < 1) ? 1 : parser.get<int>("fpi");
     auto fps = (parser.get<int>("fps") <= 0) ? 30 : parser.get<int>("fps");    
     auto frameWidth = 
-        (parser.get<int>("width") <= 0) ? 400 : parser.get<int>("width");
+        (parser.get<int>("width") <= 0) ? 1200 : parser.get<int>("width");
     auto frameHeight = 
-        (parser.get<int>("height") <= 0) ? 300 : parser.get<int>("height");
+        (parser.get<int>("height") <= 0) ? 600 : parser.get<int>("height");
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
