@@ -233,7 +233,8 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
         {
             int classIdx = i * groupSize + j;
             cv::rectangle(group, cv::Rect(borderX, borderY + j * stepHeight,
-                rectWidth, stepHeight), colors[classIdx], -1);
+                rectWidth, stepHeight), cv::Scalar(colors[classIdx][2], 
+                colors[classIdx][1], colors[classIdx][0]), -1);
             cv::putText(group, classes[classIdx], 
                 cv::Point(borderX + rectWidth + shiftX, 
                           borderY + j * stepHeight + 3 * shiftY / 2),

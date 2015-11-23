@@ -9,6 +9,7 @@
 
 #include "movie_maker.hpp"
 #include "utilities.hpp"
+#include "exception.hpp"
 
 static const char argsDefs[] = 
     "{ i | imgs             |      | Path to dataset images                  }"
@@ -22,7 +23,7 @@ static const char argsDefs[] =
 
 void printHelp(std::ostream& os)
 {
-    os << "\tUsage: -i path/to/jpeg -s results/net -d results/crf " 
+    os << "Usage: -i path/to/jpeg -s results/net -d results/crf " 
        << "-o filename.avi" << std::endl 
        << "\t[--fpi=<number>, --width=1200, --height=600 --fps=30]"
        << std::endl;
@@ -55,9 +56,18 @@ int main(int argc, char* argv[])
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
-    Utilities::GetFilesInFolder(imgsDir, "*.jpg", images);
-    Utilities::GetFilesInFolder(segmImgsDir, "*.png", segmImages);
-    Utilities::GetFilesInFolder(dcrfSegmImgsDir, "*.png", dcrfSegmImages);
+    try
+    {
+        Utilities::GetFilesInFolder(imgsDir, "*.jpg", images);
+        Utilities::GetFilesInFolder(segmImgsDir, "*.png", segmImages);
+        Utilities::GetFilesInFolder(dcrfSegmImgsDir, "*.png", dcrfSegmImages);
+    }
+    catch (exception ex)
+    {
+        std::cout << ex.what() << std::endl;
+        printHelp(std::cout);
+        return 0;
+    }
     std::vector<std::vector<std::string> > imgsSet;
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);
