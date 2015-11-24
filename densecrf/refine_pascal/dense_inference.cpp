@@ -70,7 +70,7 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 
 
 template <typename T>
-void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool do_ppm_format) {
+void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool transpose) {
     mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
     if (matfp == NULL) {
         throw exception("Error opening MAT file: '" + fileName + "'.");
@@ -120,32 +120,33 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
     // matvar->dims[0] : width
     // matvar->dims[1] : height
     const int channelSize = matvar->dims[0] * matvar->dims[1];
-    channels = static_cast<int>(matvar->dims[2]);
+    channels = matvar->dims[2];
 
-    // extract from fileData
-    if (do_ppm_format) {
-        int out_offset = cols * channels;
+    // extract from fileData and crop mat file to image size (cols, rows)
+    if (transpose) {
+        const int out_offset = cols * channels;
 
         for (int channel = 0; channel < channels; ++channel) {
             for (int row = 0; row < rows; ++row) {
                 for (int column = 0; column < cols; ++column) {
+                    // fileData[channel][row][column] -> data[row][column][channel]
+
                     // perform transpose of fileData
-                    const int in_ind    = column + row * matvar->dims[0] + channel * channelSize;    
-                    const int out_ind = row * out_offset + column * channels + channel;
-                    // note the minus sign
-                    data[out_ind] = -fileData[in_ind]; 
+                    const int in_ind  = column  + row * matvar->dims[0] + channel * channelSize;
+                    const int out_ind = channel + column * channels     + row * out_offset;                                        
+                    data[out_ind] = -fileData[in_ind]; // note the minus sign
                 }
             }
         }
     } else {
-        int out_offset = rows * cols;
-
         for (int channel = 0; channel < channels; ++channel) {
             for (int row = 0; row < rows; ++row) {
                 for (int column = 0; column < cols; ++column) {
-                    const int in_ind    = row + column * matvar->dims[0] + channel * channelSize;
-                    const int out_ind = row + column * row + channel * out_offset; 
-                    data[out_ind] = -fileData[in_ind];        
+                    // fileData[channel][column][row] -> data[channel][column][row]
+
+                    const int in_ind  = row + column * matvar->dims[0] + channel * channelSize;
+                    const int out_ind = row + column * rows            + channel * channelSize; 
+                    data[out_ind] = -fileData[in_ind]; // note the minus sign
                 }
             }
         }
@@ -164,9 +165,9 @@ void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, in
         throw exception("Fail to open file: '" + fileName + "'.");
     }
 
-    ifs.read((char*)&rows, sizeof(int));
-    ifs.read((char*)&cols, sizeof(int));
-    ifs.read((char*)&channels, sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&rows), sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&cols), sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&channels), sizeof(int));
 
     const int num_el = rows * cols * channels;
     data = new T[num_el];
@@ -183,9 +184,9 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
         throw exception("Fail to open file: '" + fileName + "'.");
     }    
 
-    ofs.write((char*)&rows, sizeof(int));
-    ofs.write((char*)&cols, sizeof(int));
-    ofs.write((char*)&channels, sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&rows), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&cols), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&channels), sizeof(int));
 
     int num_el = rows * cols * channels;
     ofs.write(reinterpret_cast<const char*>(data), sizeof(T) * num_el);
@@ -194,7 +195,7 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 }
 
 
-void ReshapeToMatlabFormat(short*& result, short* map, int rows, int cols) {
+void ReshapeToMatlabFormat(const short* map, int rows, int cols, short*& result) {
     //row-order to column-order
     for (int h = 0; h < rows; ++h) {
         for (int w = 0; w < cols; ++w) {
@@ -352,7 +353,6 @@ int main(int argc, char* argv[]) {
     generateImageNames(featureNamesList, "_blob_0", imageNamesList);
 
     std::string fileName;
-    const bool do_ppm_format = true;
     cv::Mat loadedImage;
 
     const clock_t timeStart = clock();
@@ -373,9 +373,13 @@ int main(int argc, char* argv[]) {
 
         fileName = inp.featureDir + "/" + featureNamesList[i] + ".mat";
 
+        /* CRF works with the next image data order: data[height][width][channels] 
+         * so we have to transpose loaded mat file to row-order
+        */
+        const bool transpose = true;
         float* features = NULL;
         int featuresChannels;
-        LoadMatFile(fileName, features, featuresRows, featuresColumns, featuresChannels, do_ppm_format);
+        LoadMatFile(fileName, features, featuresRows, featuresColumns, featuresChannels, transpose);
 
         // Setup the CRF model
         DenseCRF2D crf(featuresColumns, featuresRows, featuresChannels);
@@ -393,7 +397,7 @@ int main(int argc, char* argv[]) {
         crf.map(inp.maxIterations, map);
 
         short* result = new short[featuresRows * featuresColumns];
-        ReshapeToMatlabFormat(result, map, featuresRows, featuresColumns);
+        ReshapeToMatlabFormat(map, featuresRows, featuresColumns, result);
 
         // save results
         fileName = inp.outputDir + "/" + imageNamesList[i] + ".bin";
