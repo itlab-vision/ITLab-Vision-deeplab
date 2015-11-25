@@ -80,11 +80,12 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    //create vector of corresponding images
+    // create vector of corresponding images
     std::vector<std::vector<std::string> > imgsSet;
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);
     imgsSet.push_back(dcrfSegmImages);
+    // create vector of titles
     std::vector<std::string> setNames;
     setNames.push_back("Initial image");
     setNames.push_back("Segmented image (CNN)");
