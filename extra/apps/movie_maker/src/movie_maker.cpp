@@ -5,12 +5,9 @@ void MovieMaker::createVideo(std::istream& list,
     const std::string& outputFileName)
 {
     cv::VideoWriter videoWriter;
-
-    std::string tempFile = cv::tempfile(
-        outputFileName.substr(outputFileName.rfind('.')).c_str());
-    std::cout << "Opening file '" << tempFile << "' for writing." << std::endl;
-    if (videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
-        cv::Size(frameWidth, frameHeight)) == false)
+    videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
+        cv::Size(frameWidth, frameHeight));
+    if (!videoWriter.isOpened())
     {
         throw exception("Failed to open file for video writing.");
     }
@@ -26,7 +23,7 @@ void MovieMaker::createVideo(std::istream& list,
 
         for (int i = 0; i < frameRepeat; ++i)
         {
-            videoWriter.write(image);
+            videoWriter << image;
         }
         count += frameRepeat;
     }
