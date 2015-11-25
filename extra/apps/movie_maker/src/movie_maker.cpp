@@ -35,7 +35,7 @@ void MovieMaker::createVideo(std::istream& list,
     std::cout << "Total frames written: " << count << std::endl;
 }
 
-bool MovieMaker::checkSizeImagesSet(
+bool MovieMaker::checkEqualSize(
     const std::vector<std::vector<std::string> > &imagesSet)
 {
     int kSets = imagesSet.size();
@@ -49,6 +49,19 @@ bool MovieMaker::checkSizeImagesSet(
     return true;
 }
 
+void MovieMaker::getCorrespondingImages(
+    const std::vector<std::vector<std::string> > &imagesSet,
+    const int idx, std::vector<cv::Mat> &images)
+{
+    int kSets = imagesSet.size();
+    for (int i = 0; i < kSets; i++)
+    {
+        std::string fileName = imagesSet[i][idx];
+        cv::Mat image = cv::imread(fileName);
+        images.push_back(image);
+    }
+}
+
 void MovieMaker::createVideo(
         const std::vector<std::vector<std::string> > &imagesSet,
         const std::string &outputFileName)
@@ -57,26 +70,20 @@ void MovieMaker::createVideo(
     {
         throw exception("List of image sets is empty.");
     }  
-    if (!checkSizeImagesSet(imagesSet))
+    if (!checkEqualSize(imagesSet))
     {
         throw exception("Sets of images should have the same size.");
     }
-
+    
+    // create legend
     cv::Mat legend;
     createVOCLegend(legend);
-
-    int kSets = imagesSet.size();
-    int kImages = imagesSet[0].size();
-    size_t count = 0;    
-    int idx = 0;
+    
+    // extract corresponding images    
     std::vector<cv::Mat> images;
-    for (int i = 0; i < kSets; i++)
-    {
-        std::string fileName = imagesSet[i][idx];
-        cv::Mat image = cv::imread(fileName);
-        images.push_back(image);
-    }
-        
+    getCorrespondingImages(imagesSet, 0, images);
+    
+    // prepare first frame for writing
     cv::Mat imgsFrame;
     mergeImages(images, imgsFrame);
     preprocessImage(imgsFrame);
@@ -88,6 +95,7 @@ void MovieMaker::createVideo(
     imgsFrame.copyTo(frame(imgsRect));
     legend.copyTo(frame(legendRect));
     
+    //create video writer
     cv::VideoWriter videoWriter;
     videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
         cv::Size(frame.cols, frame.rows));
@@ -95,22 +103,24 @@ void MovieMaker::createVideo(
     {
         throw exception("Failed to open file for video writing.");
     }
+
+    // write first frame
     for(int i = 0; i < frameRepeat; ++i)
     {
         videoWriter << frame;
     }
-    count += frameRepeat;
-    idx++;
+    size_t count = frameRepeat;
+    int idx = 1;
+
+    // write other frames
+    int kImages = imagesSet[0].size();
+    int kSets = imagesSet.size();
     while (idx < kImages)
     {
+        // extract corresponding images
         images.clear();
-        for (int i = 0; i < kSets; i++)
-        {
-            std::string fileName = imagesSet[i][idx];
-            cv::Mat image = cv::imread(fileName);
-            images.push_back(image);
-        }
-        
+        getCorrespondingImages(imagesSet, idx, images);
+        // prepare frame for writing
         cv::Mat imgsFrame;
         mergeImages(images, imgsFrame);
         preprocessImage(imgsFrame);
@@ -121,7 +131,7 @@ void MovieMaker::createVideo(
                  legendRect(0, imgsFrame.rows, frame.cols, legend.rows);
         imgsFrame.copyTo(frame(imgsRect));
         legend.copyTo(frame(legendRect));
-        
+        // write frame
         for (int i = 0; i < frameRepeat; ++i)
         {
             videoWriter << frame;
@@ -177,7 +187,7 @@ void MovieMaker::preprocessImage(cv::Mat& image)
               frameWidth / ((float)image.cols) : scaleOx;
     scaleOy = (image.rows > frameHeight) ? 
               frameHeight / ((float)image.rows) : scaleOy;
-    scale = (scaleOx > scaleOy) ? scaleOy : scaleOx;
+    scale   = (scaleOx > scaleOy) ? scaleOy : scaleOx;
 
     cv::Mat resized;
     cv::resize(image, resized, cv::Size(), scale, scale);
@@ -216,15 +226,20 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
         cv::Scalar(0.501960784313726, 0.752941176470588, 0.0),
         cv::Scalar(0.0, 0.250980392156863, 0.501960784313726)
     };
+
     const int borderX = 5, borderY = 5;
     const int kGroups = 3, groupSize = kClasses / kGroups;    
-    const int width = frameWidth - 2 * kGroups * borderX, 
-              height = frameHeight / 2 - 2 * kGroups * borderY;
+    
+    const int widthWithBorders = frameWidth,
+              heightWithBorders = frameHeight / 2;
+    const int width = widthWithBorders - 2 * kGroups * borderX, 
+              height = heightWithBorders - 2 * kGroups * borderY;
+    
     const int step = width / kGroups + 2 * borderX;
     const int stepHeight = height / groupSize, rectWidth = 30,
               shiftX = 5, shiftY = rectWidth / 2;
-    legend = cv::Mat(height + 2 * kGroups * borderY,
-        width + 2 * kGroups * borderX, CV_32FC3);
+
+    legend = cv::Mat(heightWithBorders, widthWithBorders, CV_32FC3);
     for (int i = 0; i < kGroups; i++)
     {
         cv::Rect roi(i * step, 0, step, height + 2 * borderY);
@@ -232,13 +247,15 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
         for (int j = 0; j < groupSize; j++)
         {
             int classIdx = i * groupSize + j;
-            cv::rectangle(group, cv::Rect(borderX, borderY + j * stepHeight,
-                rectWidth, stepHeight), cv::Scalar(colors[classIdx][2], 
-                colors[classIdx][1], colors[classIdx][0]), -1);
+            cv::rectangle(group, cv::Rect(borderX, borderY + j * stepHeight, 
+                                          rectWidth, stepHeight), 
+                          cv::Scalar(colors[classIdx][2], colors[classIdx][1],
+                          colors[classIdx][0]), -1);
             cv::putText(group, classes[classIdx], 
-                cv::Point(borderX + rectWidth + shiftX, 
-                          borderY + j * stepHeight + 3 * shiftY / 2),
-                cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(1.0, 1.0, 1.0));
+                        cv::Point(borderX + rectWidth + shiftX, 
+                                  borderY + j * stepHeight + 3 * shiftY / 2),
+                        cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8,
+                        cv::Scalar(1.0, 1.0, 1.0));
         }
     }
     double minVal, maxVal;

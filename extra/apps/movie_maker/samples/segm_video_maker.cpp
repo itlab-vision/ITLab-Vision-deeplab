@@ -41,33 +41,46 @@ namespace ReturnCode
 
 int main(int argc, char* argv[])
 {
-    // read commanl line arguments
+    const int defaultFPI = 1, defaultFPS = 30,
+              defaultWidth = 1200, defaultHeight = 600;
+    const std::string imgsMask = "*.jpg", segmImgsMask = "*.png",
+                      dcrfsSegmImgsMask = "*.png";
+    // read command line arguments
     cv::CommandLineParser parser(argc, argv, argsDefs);
     auto imgsDir = parser.get<std::string>("imgs");
     auto segmImgsDir = parser.get<std::string>("segmimgs");
     auto dcrfSegmImgsDir = parser.get<std::string>("dcrfsegmimgs");
     auto videoFileName = parser.get<std::string>("video");
-    auto fpi = (parser.get<int>("fpi", false) < 1) ? 1 : parser.get<int>("fpi");
-    auto fps = (parser.get<int>("fps", false) <= 0) ? 30 : parser.get<int>("fps");    
+    auto fpi = 
+        (parser.get<int>("fpi", false) < 1) ?
+        defaultFPI : parser.get<int>("fpi");
+    auto fps = 
+        (parser.get<int>("fps", false) <= 0) ? 
+        defaultFPS : parser.get<int>("fps");    
     auto frameWidth = 
-        (parser.get<int>("width", false) <= 0) ? 1200 : parser.get<int>("width");
+        (parser.get<int>("width", false) <= 0) ? 
+        defaultWidth : parser.get<int>("width");
     auto frameHeight = 
-        (parser.get<int>("height", false) <= 0) ? 600 : parser.get<int>("height");
+        (parser.get<int>("height", false) <= 0) ? 
+        defaultHeight : parser.get<int>("height");
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
     try
     {
-        Utilities::GetFilesInFolder(imgsDir, "*.jpg", images);
-        Utilities::GetFilesInFolder(segmImgsDir, "*.png", segmImages);
-        Utilities::GetFilesInFolder(dcrfSegmImgsDir, "*.png", dcrfSegmImages);
+        Utilities::GetFilesInFolder(imgsDir, imgsMask, images);
+        Utilities::GetFilesInFolder(segmImgsDir, segmImgsMask, segmImages);
+        Utilities::GetFilesInFolder(dcrfSegmImgsDir, dcrfsSegmImgsMask, 
+            dcrfSegmImages);
     }
-    catch (exception ex)
+    catch (std::exception &ex)
     {
         std::cout << ex.what() << std::endl;
         printHelp(std::cout);
         return 0;
     }
+
+    //create vector of corresponding images
     std::vector<std::vector<std::string> > imgsSet;
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);
@@ -75,6 +88,14 @@ int main(int argc, char* argv[])
 
     // create movie
     MovieMaker maker(frameWidth, frameHeight, fpi, fps);
-    maker.createVideo(imgsSet, videoFileName);
-    return 0;
+    try
+    {
+        maker.createVideo(imgsSet, videoFileName);
+    }
+    catch (std::exception &ex)
+    {
+        std::cout << ex.what() << std::endl;
+        return 0;
+    }
+    return 1;
 }
