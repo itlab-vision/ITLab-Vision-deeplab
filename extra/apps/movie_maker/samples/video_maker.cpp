@@ -18,7 +18,7 @@ static const char argsDefs[] =
 void printHelp(std::ostream& os)
 {
     os << "\tUsage: --list=path/to/list.txt --video=output/filename" << std::endl
-       << "\t[--fpi=<number>, --width=400, --height=300 --fps=30]" << std::endl;
+       << "\t[--fpi=1, --width=400, --height=300 --fps=30]" << std::endl;
 }
 
 namespace ReturnCode
@@ -27,13 +27,17 @@ namespace ReturnCode
     {
         Success = 0,
         InputFileNotFound = 1,
-        OutputFileNotSpecified = 2
+        OutputFileNotSpecified = 2,
+        VideoNotCreated = 3
     };
 }; //namespace ReturnCode
 
 
 int main(int argc, char* argv[])
 {
+    const int defaultFPI = 1, defaultFPS = 30,
+              defaultWidth = 400, defaultHeight = 300;
+    // read command line arguments
     cv::CommandLineParser parser(argc, argv, argsDefs);
     auto listFileName = parser.get<std::string>("list");
     auto videoFileName = parser.get<std::string>("video");
@@ -51,26 +55,18 @@ int main(int argc, char* argv[])
         printHelp(std::cerr);
         return ReturnCode::OutputFileNotSpecified;
     }
-    int framesPerImage = parser.get<int>("fpi");
-    if (framesPerImage < 1)
-    {
-        framesPerImage = 1;
-    }
-    int fps = parser.get<int>("fps");
-    if (fps <= 0)
-    {
-        fps = 30; //magic
-    }
-    int frameWidth = parser.get<int>("width");
-    int frameHeight = parser.get<int>("height");
-    if (frameWidth <= 0)
-    {
-        frameWidth = 400; //magic
-    }
-    if (frameHeight <= 0)
-    {
-        frameHeight = 300; //magic
-    }
+    auto fpi = 
+        (parser.get<int>("fpi", false) < 1) ?
+        defaultFPI : parser.get<int>("fpi");
+    auto fps = 
+         (parser.get<int>("fps", false) <= 0) ? 
+         defaultFPS : parser.get<int>("fps");    
+    auto frameWidth = 
+         (parser.get<int>("width", false) <= 0) ? 
+         defaultWidth : parser.get<int>("width");
+    auto frameHeight = 
+         (parser.get<int>("height", false) <= 0) ? 
+         defaultHeight : parser.get<int>("height");
 
     std::ifstream list(listFileName);
     if (list.is_open() == false)
@@ -80,7 +76,7 @@ int main(int argc, char* argv[])
         return ReturnCode::InputFileNotFound;
     }
     
-    MovieMaker maker(frameWidth, frameHeight, framesPerImage, fps);
+    MovieMaker maker(frameWidth, frameHeight, fpi, fps);
     try
     {
         maker.createVideo(list, videoFileName);
@@ -90,7 +86,8 @@ int main(int argc, char* argv[])
     catch (const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
+        return ReturnCode::VideoNotCreated;
     }
 
-    return 0;
+    return ReturnCode::Success;
 }

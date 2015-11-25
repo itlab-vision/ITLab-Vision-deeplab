@@ -34,8 +34,9 @@ namespace ReturnCode
     enum
     {
         Success = 0,
-        InputFileNotFound = 1,
-        OutputFileNotSpecified = 2
+        InputFilesNotFound = 1,
+        OutputFileNotSpecified = 2,
+        VideoNotCreated = 3
     };
 };
 
@@ -51,18 +52,24 @@ int main(int argc, char* argv[])
     auto segmImgsDir = parser.get<std::string>("segmimgs");
     auto dcrfSegmImgsDir = parser.get<std::string>("dcrfsegmimgs");
     auto videoFileName = parser.get<std::string>("video");
+    if (videoFileName.empty() == true)
+    {
+        std::cerr << "Output file is not specified." << std::endl;
+        printHelp(std::cerr);
+        return ReturnCode::OutputFileNotSpecified;
+    }
     auto fpi = 
-        (parser.get<int>("fpi", false) < 1) ?
-        defaultFPI : parser.get<int>("fpi");
+         (parser.get<int>("fpi", false) < 1) ?
+         defaultFPI : parser.get<int>("fpi");
     auto fps = 
-        (parser.get<int>("fps", false) <= 0) ? 
-        defaultFPS : parser.get<int>("fps");    
+         (parser.get<int>("fps", false) <= 0) ? 
+         defaultFPS : parser.get<int>("fps");    
     auto frameWidth = 
-        (parser.get<int>("width", false) <= 0) ? 
-        defaultWidth : parser.get<int>("width");
+         (parser.get<int>("width", false) <= 0) ? 
+         defaultWidth : parser.get<int>("width");
     auto frameHeight = 
-        (parser.get<int>("height", false) <= 0) ? 
-        defaultHeight : parser.get<int>("height");
+         (parser.get<int>("height", false) <= 0) ? 
+         defaultHeight : parser.get<int>("height");
     
     // read initial and segmented images
     std::vector<std::string> images, segmImages, dcrfSegmImages;
@@ -73,11 +80,11 @@ int main(int argc, char* argv[])
         Utilities::GetFilesInFolder(dcrfSegmImgsDir, dcrfsSegmImgsMask, 
             dcrfSegmImages);
     }
-    catch (std::exception &ex)
+    catch (const std::exception &ex)
     {
-        std::cout << ex.what() << std::endl;
+        std::cerr << ex.what() << std::endl;
         printHelp(std::cout);
-        return 0;
+        return ReturnCode::InputFilesNotFound;
     }
 
     // create vector of corresponding images
@@ -97,10 +104,10 @@ int main(int argc, char* argv[])
     {
         maker.createVideo(setNames, imgsSet, videoFileName);
     }
-    catch (std::exception &ex)
+    catch (const std::exception &ex)
     {
-        std::cout << ex.what() << std::endl;
-        return 0;
+        std::cerr << ex.what() << std::endl;
+        return ReturnCode::VideoNotCreated;
     }
-    return 1;
+    return ReturnCode::Success;
 }
