@@ -85,12 +85,16 @@ int main(int argc, char* argv[])
     imgsSet.push_back(images);
     imgsSet.push_back(segmImages);
     imgsSet.push_back(dcrfSegmImages);
+    std::vector<std::string> setNames;
+    setNames.push_back("Initial image");
+    setNames.push_back("Segmented image (CNN)");
+    setNames.push_back("Segmented image (CNN + denseCRF)");
 
     // create movie
     MovieMaker maker(frameWidth, frameHeight, fpi, fps);
     try
     {
-        maker.createVideo(imgsSet, videoFileName);
+        maker.createVideo(setNames, imgsSet, videoFileName);
     }
     catch (std::exception &ex)
     {

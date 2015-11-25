@@ -18,7 +18,8 @@ public:
     {}
 
     void createVideo(std::istream& list, const std::string& outputFileName);
-    void createVideo(const std::vector<std::vector<std::string> > &imagesSet,
+    void createVideo(const std::vector<std::string> &setNames,
+            const std::vector<std::vector<std::string> > &imagesSet,
             const std::string &outputFileName);
 private:
     int frameWidth;
@@ -28,10 +29,12 @@ private:
 
     void mergeImages(const std::vector<cv::Mat> &images, cv::Mat &frame);
     bool checkEqualSize(const std::vector<std::vector<std::string> > &imagesSet);
-    void MovieMaker::getCorrespondingImages(
+    void getCorrespondingImages(
             const std::vector<std::vector<std::string> > &imagesSet,
             const int idx, std::vector<cv::Mat> &images);
     void createVOCLegend(cv::Mat &legend);
+    void appendTitle(const std::vector<std::string> &setNames, 
+            cv::Mat &imgsFrame);
     void preprocessImage(cv::Mat &image);
 };
 

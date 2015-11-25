@@ -62,7 +62,29 @@ void MovieMaker::getCorrespondingImages(
     }
 }
 
-void MovieMaker::createVideo(
+void MovieMaker::appendTitle(const std::vector<std::string> &setNames, 
+            cv::Mat &imgsFrame)
+{
+    const int height = 40, width = imgsFrame.cols, 
+              shiftOx = 5, shiftOy = 20,
+              step = imgsFrame.cols / setNames.size();
+    cv::Rect titleRoi(0, 0, width, height), 
+             imgsRoi(0, height, imgsFrame.cols, imgsFrame.rows);
+    cv::Mat frame = cv::Mat::zeros(imgsFrame.rows + height, imgsFrame.cols,
+                                   imgsFrame.type());
+    cv::Mat titleSubFrame = frame(titleRoi);
+    imgsFrame.copyTo(frame(imgsRoi));
+    for (int i = 0; i < setNames.size(); i++)
+    {
+        cv::Point cursor(i * step + shiftOx, shiftOy);
+        cv::putText(titleSubFrame, setNames[i], cursor, 
+                    cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8,
+                    cv::Scalar(255, 255, 255));
+    }
+    imgsFrame = frame;
+}
+
+void MovieMaker::createVideo(const std::vector<std::string> &setNames,
         const std::vector<std::vector<std::string> > &imagesSet,
         const std::string &outputFileName)
 {    
@@ -87,6 +109,7 @@ void MovieMaker::createVideo(
     cv::Mat imgsFrame;
     mergeImages(images, imgsFrame);
     preprocessImage(imgsFrame);
+    appendTitle(setNames, imgsFrame);
     cv::Mat frame(imgsFrame.rows + legend.rows,
         (imgsFrame.cols > legend.cols) ? imgsFrame.cols : legend.cols,
         CV_8UC3);
@@ -124,6 +147,7 @@ void MovieMaker::createVideo(
         cv::Mat imgsFrame;
         mergeImages(images, imgsFrame);
         preprocessImage(imgsFrame);
+        appendTitle(setNames, imgsFrame);
         cv::Mat frame(imgsFrame.rows + legend.rows,
             (imgsFrame.cols > legend.cols) ? imgsFrame.cols : legend.cols,
             CV_8UC3);
