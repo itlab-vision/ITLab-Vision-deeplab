@@ -25,7 +25,7 @@ void printHelp(std::ostream& os)
 {
     os << "Usage: -i path/to/jpeg -s results/net -d results/crf " 
        << "-o filename.avi" << std::endl 
-       << "\t[--fpi=<number>, --width=1200, --height=600 --fps=30]"
+       << "\t[--fpi=1, --width=1200, --height=600 --fps=30]"
        << std::endl;
 }
 
