@@ -29,10 +29,16 @@ private:
 
     void mergeImages(const std::vector<cv::Mat> &images, cv::Mat &frame);
     bool checkEqualSize(const std::vector<std::vector<std::string> > &imagesSet);
+    int checkClassExistense(
+            const std::vector<std::vector<std::string> > &imagesSet,
+            const cv::Scalar *colors, const int kClasses, int *isPresent);
+    void getNextClassIdx(const int *isPresent, int kClasses, int &classIdx);
     void getCorrespondingImages(
             const std::vector<std::vector<std::string> > &imagesSet,
             const int idx, std::vector<cv::Mat> &images);
-    void createVOCLegend(cv::Mat &legend);
+    void createVOCLegend(
+            const std::vector<std::vector<std::string> > &imagesSet,
+            cv::Mat &legend);
     void appendTitle(const std::vector<std::string> &setNames, 
             cv::Mat &imgsFrame);
     void preprocessImage(cv::Mat &image);

@@ -96,7 +96,7 @@ void MovieMaker::createVideo(const std::vector<std::string> &setNames,
     
     // create legend
     cv::Mat legend;
-    createVOCLegend(legend);
+    createVOCLegend(imagesSet, legend);
     
     // extract corresponding images    
     std::vector<cv::Mat> images;
@@ -215,7 +215,52 @@ void MovieMaker::preprocessImage(cv::Mat& image)
     image = resized;
 }
 
-void MovieMaker::createVOCLegend(cv::Mat &legend)
+int MovieMaker::checkClassExistense(
+    const std::vector<std::vector<std::string> > &imagesSet, 
+    const cv::Scalar *colors, const int kClasses, int *isPresent)
+{
+    const double eps = 0.001;
+    int kSets = imagesSet.size(), kClassesExist = 0;
+    for (int i = 0; i < kClasses; i++)
+    {
+        isPresent[i] = 0;
+    }
+    for (int i = 1; i < kSets; i++)
+    {
+        int kImages = imagesSet[i].size();
+        for (int j = 0; j < kImages; j++)
+        {
+            cv::Mat image = cv::imread(imagesSet[i][j]), image64f;
+            image.convertTo(image64f, CV_64F, 1.0 / 255);
+            for (int k = 0; k < kClasses; k++)
+            {
+                cv::Mat colorMask = cv::Mat(image64f.rows, image64f.cols,
+                    image64f.type(), 
+                    cv::Scalar(colors[k][2], colors[k][1], colors[k][0]));
+                cv::Mat diff = cv::abs(image64f - colorMask);
+                std::vector<cv::Mat> channels;
+                cv::split(diff, channels);
+                cv::Mat sum = cv::Mat::zeros(image64f.rows, image64f.cols, CV_64FC1);
+                int kChannels = channels.size();
+                for (int m = 0; m < kChannels; m++)
+                {
+                    sum += channels[m];
+                }
+                cv::Mat mask = sum < eps;
+                int count = cv::countNonZero(mask);
+                if (count != 0 && isPresent[k] == 0)
+                {
+                    isPresent[k] = 1;
+                    kClassesExist++;
+                }
+            }
+        }
+    }
+    return kClassesExist;
+}
+
+void MovieMaker::createVOCLegend(
+    const std::vector<std::vector<std::string> > &imagesSet, cv::Mat &legend)
 {
     const int kClasses = 21;
     const char *classes [] = {
@@ -247,12 +292,16 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
         cv::Scalar(0.501960784313726, 0.752941176470588, 0.0),
         cv::Scalar(0.0, 0.250980392156863, 0.501960784313726)
     };
+    int isPresent[kClasses];
+    int kClassesExist = checkClassExistense(imagesSet, colors, 
+                                            kClasses, isPresent);
 
-    const int borderX = 5, borderY = 5;
-    const int kGroups = 3, groupSize = kClasses / kGroups;    
+    const int borderX = 5, borderY = 5, bboxHeight = 30;
+    const int kGroups = 3, 
+              groupSize = (kClassesExist + kClassesExist % kGroups + 1) / kGroups;
     
     const int widthWithBorders = frameWidth,
-              heightWithBorders = frameHeight / 2;
+              heightWithBorders = bboxHeight * groupSize + 2 * kGroups * borderY;
     const int width = widthWithBorders - 2 * kGroups * borderX, 
               height = heightWithBorders - 2 * kGroups * borderY;
     
@@ -261,17 +310,18 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
               shiftX = 5, shiftY = rectWidth / 2;
 
     legend = cv::Mat(heightWithBorders, widthWithBorders, CV_32FC3);
-    for (int i = 0; i < kGroups; i++)
+    int classIdx = -1;
+    for (int i = 0; i < kGroups - 1; i++)
     {
         cv::Rect roi(i * step, 0, step, height + 2 * borderY);
         cv::Mat group = legend(roi);
         for (int j = 0; j < groupSize; j++)
         {
-            int classIdx = i * groupSize + j;
+            getNextClassIdx(isPresent, kClasses, classIdx);
             cv::rectangle(group, cv::Rect(borderX, borderY + j * stepHeight, 
                                           rectWidth, stepHeight), 
                           cv::Scalar(colors[classIdx][2], colors[classIdx][1],
-                          colors[classIdx][0]), -1);
+                                     colors[classIdx][0]), -1);
             cv::putText(group, classes[classIdx], 
                         cv::Point(borderX + rectWidth + shiftX, 
                                   borderY + j * stepHeight + 3 * shiftY / 2),
@@ -279,7 +329,36 @@ void MovieMaker::createVOCLegend(cv::Mat &legend)
                         cv::Scalar(1.0, 1.0, 1.0));
         }
     }
+    cv::Rect roi((kGroups - 1) * step, 0, step, height + 2 * borderY);
+    cv::Mat group = legend(roi);
+    for (int j = 0; j < kClassesExist - (kGroups - 1) * groupSize; j++)
+    {
+        getNextClassIdx(isPresent, kClasses, classIdx);
+        cv::rectangle(group, cv::Rect(borderX, borderY + j * stepHeight, 
+                                        rectWidth, stepHeight), 
+                        cv::Scalar(colors[classIdx][2], colors[classIdx][1],
+                        colors[classIdx][0]), -1);
+        cv::putText(group, classes[classIdx], 
+                    cv::Point(borderX + rectWidth + shiftX, 
+                                borderY + j * stepHeight + 3 * shiftY / 2),
+                    cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8,
+                    cv::Scalar(1.0, 1.0, 1.0));
+    }
     double minVal, maxVal;
     cv::minMaxLoc(legend, &minVal, &maxVal);
     legend.convertTo(legend, CV_8UC3, 255);
+}
+
+void MovieMaker::getNextClassIdx(const int *isPresent, int kClasses, 
+    int &classIdx)
+{
+    for (int i = classIdx + 1; i < kClasses; i++)
+    {
+        if (isPresent[i])
+        {
+            classIdx = i;
+            return;
+        }
+    }
+    classIdx = kClasses;
 }
