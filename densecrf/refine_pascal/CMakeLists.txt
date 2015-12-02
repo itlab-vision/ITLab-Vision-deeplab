@@ -2,6 +2,8 @@
 
 include_directories(${DenseCRF_INCLUDE_DIRS})
 
+include_directories(${Util_INCLUDE_DIRS})
+
 find_package(MATIO REQUIRED)
 include_directories(${MATIO_INCLUDE_DIRS})
 
@@ -10,12 +12,11 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Sources
 
-file(GLOB headers *.h*)
-file(GLOB sources *.c*)
+file(GLOB mat_to_png_sources mat_to_png.c*)
+file(GLOB dense_inference_sources dense_inference.c*)
 
 # Build
-
-add_executable(refine_pascal ${headers} ${sources})
+add_executable(refine_pascal ${dense_inference_sources})
 add_dependencies(refine_pascal denseCRF)
 target_link_libraries(refine_pascal
 	denseCRF
@@ -23,6 +24,12 @@ target_link_libraries(refine_pascal
 	${OpenCV_LIBS}
 )
 
+add_executable(mat_to_png ${mat_to_png_sources})
+target_link_libraries(mat_to_png 	
+	${MATIO_LIBRARIES}
+	${OpenCV_LIBS}
+)
+
 # Install
 
-install(TARGETS refine_pascal DESTINATION bin)
+install(TARGETS refine_pascal mat_to_png DESTINATION bin)

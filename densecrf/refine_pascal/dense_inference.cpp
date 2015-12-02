@@ -1,10 +1,6 @@
 /*
  * The code is modified from the NIPS demo code by Philipp Krahenbuhl
- *
- * Added: Support LoadMatFile and SaveMatFile. 
- *
- *
- */
+*/
 /*
         Copyright (c) 2011, Philipp Krahenbuhl
         All rights reserved.
@@ -32,202 +28,46 @@
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "dense_inference.hpp"
-
-#include <cassert>
-#include <cmath>
-#include <cstdlib>
-#include <vector>
-#include <fstream>
-#include <utility>
 #include <ctime>
+#include <fstream>    
+#include <utility>
+#include <vector>
 
 #include <dirent.h>
 #include <fnmatch.h>
 
-#include "matio.h"
+#include "densecrf.h"
+#include "exception.hpp"
+#include "bin_processing.hpp"
+#include "mat_processing.hpp"
+        
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
-#include "densecrf.h"
 
 
-template <typename Dtype> enum matio_classes matio_class_map();
-template <> enum matio_classes matio_class_map<float>() { return MAT_C_SINGLE; }
-template <> enum matio_classes matio_class_map<double>() { return MAT_C_DOUBLE; }
-template <> enum matio_classes matio_class_map<int>() { return MAT_C_INT32; }
-template <> enum matio_classes matio_class_map<unsigned int>() { return MAT_C_UINT32; }
+class InputData {
+public:
+    std::string imageDir;
+    std::string featureDir;
+    std::string outputDir;
+    int maxIterations;
+    float posW;
+    float posXStd;
+    float posYStd;
+    float bilateralW;
+    float bilateralXStd;
+    float bilateralYStd;
+    float bilateralRStd;
+    float bilateralGStd;
+    float bilateralBStd;
 
+    InputData(int argc, char** argv);
 
-template <typename T>
-void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols,
-        int& channels , bool do_ppm_format = false);
+private:
+    void init();
+};
 
-template <typename T>
-void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, int& channels);
-
-template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels);
-
-
-template <typename T>
-void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool transpose) {
-    mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
-    if (matfp == NULL) {
-        throw exception("Error opening MAT file: '" + fileName + "'.");
-    }
-
-    // Read data
-    matvar_t* matvar = Mat_VarReadInfo(matfp, "data");
-    if (matvar == NULL) {
-        Mat_Close(matfp);
-        throw exception("Field 'data' not present. In MAT file: '" + fileName + "'.");
-    }
-
-    if (matvar->class_type != matio_class_map<T>()) {
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
-        throw exception("Field 'data' must be of the right class (single/double). In MAT file: '" + fileName + "'.");
-    }
-    if ((4 <= matvar->rank) && (matvar->dims[3] != 1)) {
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
-        throw exception("Field 'data' cannot have ndims > 3. In MAT file: '" + fileName + "'.");
-    }
-
-    int fileSize = 1;
-    int dataSize = rows * cols;
-    for (int k = 0; k < matvar->rank; ++k) {
-        fileSize *= matvar->dims[k];
-        
-        if (1 < k) {
-            dataSize *= matvar->dims[k];
-        }
-    }
-
-    assert(dataSize <= fileSize);
-
-    T* fileData = new T[fileSize];
-    data = new T[dataSize];
-    
-    if (Mat_VarReadDataLinear(matfp, matvar, fileData, 0, 1, fileSize) != 0) {
-        delete[] data;
-        delete[] fileData;
-        Mat_VarFree(matvar);
-        Mat_Close(matfp);
-        throw exception("Error reading array 'data' from MAT file: '" + fileName + "'.");
-    }
-
-    // matvar->dims[0] : width
-    // matvar->dims[1] : height
-    const int channelSize = matvar->dims[0] * matvar->dims[1];
-    channels = matvar->dims[2];
-
-    // extract from fileData and crop mat file to image size (cols, rows)
-    if (transpose) {
-        const int out_offset = cols * channels;
-
-        for (int channel = 0; channel < channels; ++channel) {
-            for (int row = 0; row < rows; ++row) {
-                for (int column = 0; column < cols; ++column) {
-                    // fileData[channel][row][column] -> data[row][column][channel]
-
-                    // perform transpose of fileData
-                    const int in_ind  = column  + row * matvar->dims[0] + channel * channelSize;
-                    const int out_ind = channel + column * channels     + row * out_offset;                                        
-                    data[out_ind] = -fileData[in_ind]; // note the minus sign
-                }
-            }
-        }
-    } else {
-        for (int channel = 0; channel < channels; ++channel) {
-            for (int row = 0; row < rows; ++row) {
-                for (int column = 0; column < cols; ++column) {
-                    // fileData[channel][column][row] -> data[channel][column][row]
-
-                    const int in_ind  = row + column * matvar->dims[0] + channel * channelSize;
-                    const int out_ind = row + column * rows            + channel * channelSize; 
-                    data[out_ind] = -fileData[in_ind]; // note the minus sign
-                }
-            }
-        }
-    }
-
-    Mat_VarFree(matvar);
-    Mat_Close(matfp);
-    delete[] fileData;
-}
-
-template <typename T>
-void LoadBinFile(const std::string& fileName, T*& data, int& rows, int& cols, int& channels) {
-    std::ifstream ifs(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
-
-    if (ifs.is_open() == false) {
-        throw exception("Fail to open file: '" + fileName + "'.");
-    }
-
-    ifs.read(reinterpret_cast<char*>(&rows), sizeof(int));
-    ifs.read(reinterpret_cast<char*>(&cols), sizeof(int));
-    ifs.read(reinterpret_cast<char*>(&channels), sizeof(int));
-
-    const int num_el = rows * cols * channels;
-    data = new T[num_el];
-    ifs.read(reinterpret_cast<char*>(data), sizeof(T) * num_el);
-
-    ifs.close();
-}
-
-template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels) {
-    std::ofstream ofs(fileName.c_str(), std::ios_base::out | std::ios_base::binary);
-
-    if (ofs.is_open() == false) {
-        throw exception("Fail to open file: '" + fileName + "'.");
-    }    
-
-    ofs.write(reinterpret_cast<const char*>(&rows), sizeof(int));
-    ofs.write(reinterpret_cast<const char*>(&cols), sizeof(int));
-    ofs.write(reinterpret_cast<const char*>(&channels), sizeof(int));
-
-    int num_el = rows * cols * channels;
-    ofs.write(reinterpret_cast<const char*>(data), sizeof(T) * num_el);
-
-    ofs.close();
-}
-
-
-void ReshapeToMatlabFormat(const short* map, int rows, int cols, short*& result) {
-    //row-order to column-order
-    for (int h = 0; h < rows; ++h) {
-        for (int w = 0; w < cols; ++w) {
-            const int out_index = w * rows + h;
-            const int in_index  = h * cols + w;
-            result[out_index] = map[in_index];
-        }
-    }
-}
-
-/*
- Loads an image and coverts it to RGB(888) pixel format.
- Returns false on fail, true on success.
-*/
-bool loadImage(const std::string& fileName, cv::Mat& image) {
-    image = cv::imread(fileName);
-    if (image.total() == 0) {
-        return false;
-    }
-    //convert to RGB pixel format
-    switch (image.type()) {
-    case CV_8UC3: 
-        cv::cvtColor(image, image, CV_BGR2RGB);
-        break;
-    case CV_8UC4:
-        cv::cvtColor(image, image, CV_BGRA2RGB);
-        break;
-    default: { /*none*/ }
-    }
-    return true;
-}
-
+std::ostream& operator<<(std::ostream& os, const InputData& data);
 
 std::ostream& operator<<(std::ostream& os, const InputData& inp) {
     return os
@@ -297,6 +137,27 @@ void InputData::init() {
     bilateralBStd = 5;
 }
 
+/*
+ * Loads an image and coverts it to RGB(888) pixel format.
+ * Returns false on fail, true on success.
+*/
+bool loadImage(const std::string& fileName, cv::Mat& image) {
+    image = cv::imread(fileName);
+    if (image.total() == 0) {
+        return false;
+    }
+    //convert to RGB pixel format
+    switch (image.type()) {
+    case CV_8UC3: 
+        cv::cvtColor(image, image, CV_BGR2RGB);
+        break;
+    case CV_8UC4:
+        cv::cvtColor(image, image, CV_BGRA2RGB);
+        break;
+    default: { /*none*/ }
+    }
+    return true;
+}
 
 void listDirectory(const std::string& path, const std::string& pattern, bool stripExtension, std::vector<std::string>& fileNames) {
     DIR* dir = opendir(path.c_str());
@@ -343,8 +204,18 @@ void generateImageNames(const std::vector<std::string>& list, const std::string&
 int main(int argc, char* argv[]) {
     InputData inp(argc, argv);
     std::cout << inp;
-
-    assert(inp.imageDir.empty() == false && inp.featureDir.empty() == false && inp.outputDir.empty() == false);
+    if (inp.imageDir.empty() == true) {
+        std::cerr << "Images directory not set. Exiting.";
+        return 1; // magic
+    }
+    if (inp.featureDir.empty() == true) {
+        std::cerr << "Features directory not set. Exiting.";
+        return 2; // magic      
+    }
+    if (inp.outputDir.empty() == true) {
+        std::cerr << "Output directory not set. Exiting.";
+        return 3; // magic
+    }
     
     std::vector<std::string> featureNamesList;
     listDirectory(inp.featureDir, "*.mat", true, featureNamesList);

@@ -14,8 +14,10 @@ endif()
 # Packages
 
 set(DenseCRF_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libDenseCRF)
+set(Util_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/util)
 
 # Sources
 
 add_subdirectory(libDenseCRF)
+add_subdirectory(util)
 add_subdirectory(refine_pascal)
