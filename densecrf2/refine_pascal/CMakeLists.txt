@@ -1,5 +1,4 @@
 # Packages
-
 include_directories(${DenseCRF_INCLUDE_DIRS})
 
 include_directories(${Util_INCLUDE_DIRS})
@@ -11,8 +10,6 @@ find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Sources
-
-file(GLOB mat_to_png_sources mat_to_png.c*)
 file(GLOB dense_inference_sources dense_inference.c*)
 
 # Build
@@ -24,12 +21,5 @@ target_link_libraries(refine_pascal
 	${OpenCV_LIBS}
 )
 
-add_executable(mat_to_png ${mat_to_png_sources})
-target_link_libraries(mat_to_png 	
-	${MATIO_LIBRARIES}
-	${OpenCV_LIBS}
-)
-
 # Install
-
 install(TARGETS refine_pascal mat_to_png DESTINATION bin)
