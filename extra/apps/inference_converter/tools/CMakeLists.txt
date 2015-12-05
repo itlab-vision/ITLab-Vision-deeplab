@@ -1,5 +1,7 @@
 include_directories(${Util_INCLUDE_DIRS})
 
+include_directories(${InferenceConverter_INCLUDE_DIRS})
+
 find_package(MATIO REQUIRED)
 include_directories(${MATIO_INCLUDE_DIRS})
 
@@ -15,6 +17,7 @@ target_link_libraries(mat_to_png
 	${MATIO_LIBRARIES}
 	${OpenCV_LIBS}
 	${Util_LIBS}
+	${InferenceConverter_LIBS}
 )
 
 # Install

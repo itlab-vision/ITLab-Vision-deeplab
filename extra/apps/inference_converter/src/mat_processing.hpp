@@ -1,5 +1,5 @@
-#ifndef MAT_PROCESSING_H
-#define MAT_PROCESSING_H
+#ifndef MAT_PROCESSING_HPP
+#define MAT_PROCESSING_HPP
 
 #include <iostream>
 #include <memory>
@@ -145,4 +145,4 @@ void ReshapeToMatlabFormat(const T* map, int rows, int cols, T* result) {
     }
 }
 
-#endif // MAT_PROCESSING_H
+#endif // MAT_PROCESSING_HPP

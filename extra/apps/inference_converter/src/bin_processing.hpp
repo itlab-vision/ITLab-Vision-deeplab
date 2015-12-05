@@ -1,5 +1,5 @@
-#ifndef BIN_PROCESSING_H
-#define BIN_PROCESSING_H
+#ifndef BIN_PROCESSING_HPP
+#define BIN_PROCESSING_HPP
 
 #include <fstream>
 #include <ios>
@@ -54,4 +54,4 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 }
 
 
-#endif // BIN_PROCESSING_H
+#endif // BIN_PROCESSING_HPP

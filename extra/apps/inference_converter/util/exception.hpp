@@ -1,5 +1,5 @@
-#ifndef EXCEPTION_H
-#define EXCEPTION_H
+#ifndef EXCEPTION_HPP
+#define EXCEPTION_HPP
 
 #include <exception>        
 #include <iostream>
@@ -25,4 +25,4 @@ private:
     std::string message;
 };
 
-#endif // EXCEPTION_H
+#endif // EXCEPTION_HPP
