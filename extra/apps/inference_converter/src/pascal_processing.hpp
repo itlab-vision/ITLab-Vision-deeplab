@@ -15,7 +15,8 @@ public:
                          const std::vector<std::string>& imageFileNames,
                          const std::string& inferenceDir,
                          const std::string& datasetDir,
-            			 const std::string& outputDir
+            			 const std::string& outputDir,
+                         bool grayscale = false
                         );
 
 private:
@@ -24,7 +25,7 @@ private:
     const size_t netReceptiveFieldSize;
     const size_t pascalClassCount;
 
-    void convertSegmentationToPascal(float* inference, size_t channels, cv::Mat& outputImage);
+    void convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage);
     void writeSegmentedImage(const std::string& fileName, const cv::Mat& data);
 };
 

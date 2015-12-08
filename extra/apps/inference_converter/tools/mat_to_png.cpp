@@ -17,10 +17,11 @@ void generateImageNames(const std::vector<std::string>& list, const std::string&
 }
 
 static const char commandLineDescription[] = 
-    "{ d |       | Dataset .jpg images directory }"
-    "{ h | false | Show help                     }"
-    "{ i |       | Input .mat files directory    }"
-    "{ o |       | Output .png directory         }"
+    "{ b | false | Convert to grayscale(GT) format }"
+    "{ d |       | Dataset .jpg images directory   }"
+    "{ h | false | Show help                       }"
+    "{ i |       | Input .mat files directory      }"
+    "{ o |       | Output .png directory           }"
 
     "{   | rfs   | 513 | Net receptive field size, defaults to 513 }";
 
@@ -40,6 +41,7 @@ int main(int argc, char** argv) {
     if (receptiveFieldSize <= 0) {
         receptiveFieldSize = 513; // magic
     }
+    const bool doGTformat = parser.get<bool>("b");
     if (parser.get<bool>("h") == true) {
         printHelp(std::cout);
         return 0;
@@ -59,7 +61,7 @@ int main(int argc, char** argv) {
 
     try {
         PascalProcessor pascalProcessor(21, receptiveFieldSize);
-        pascalProcessor.convertMatToPng(matFilesList, imagesList, inputDir, datasetDir, outputDir);
+        pascalProcessor.convertMatToPng(matFilesList, imagesList, inputDir, datasetDir, outputDir, doGTformat);
         std::cout << "Done." << std::endl;
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

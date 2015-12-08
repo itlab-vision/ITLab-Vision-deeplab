@@ -8,7 +8,12 @@
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
+#include "exception.hpp"
 #include "mat_processing.hpp"
+
+
+void convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage);
+void convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage, const cv::Scalar* colormap);
 
 
 const cv::Scalar PascalProcessor::pascalColors[] = {
@@ -44,7 +49,8 @@ void PascalProcessor::convertMatToPng(
             const std::vector<std::string>& imageFileNames,
             const std::string& inferenceDir,
             const std::string& datasetDir,
-            const std::string& outputDir
+            const std::string& outputDir,
+            bool grayscale
             )
 {
     //preallocate memory for images
@@ -69,7 +75,6 @@ void PascalProcessor::convertMatToPng(
             std::cerr << "Failed to open image: '" << fileName << "'." << std::endl;
             continue;
         }
-        outputImage.create(datasetImage.rows, datasetImage.cols, CV_8UC3);
         
         int channels = 0;
         LoadMatFile(inferenceDir + "/" + matFileNames[i] + ".mat", 
@@ -77,7 +82,12 @@ void PascalProcessor::convertMatToPng(
                     channels, true, matBuffer, matBufferSize
                    );
 
-        convertSegmentationToPascal(inference, channels, outputImage);
+        if (grayscale == true) {
+            outputImage.create(datasetImage.rows, datasetImage.cols, CV_8UC1);
+        } else {
+            outputImage.create(datasetImage.rows, datasetImage.cols, CV_8UC3);
+        }
+        PascalProcessor::convertSegmentationToPascal(inference, channels, outputImage); 
         
         writeSegmentedImage(outputDir + "/" + imageFileNames[i] + ".png", outputImage);
     }
@@ -90,7 +100,31 @@ void PascalProcessor::writeSegmentedImage(const std::string& fileName, const cv:
     cv::imwrite(fileName, data);
 }
 
-void PascalProcessor::convertSegmentationToPascal(float* inference, size_t channels, cv::Mat& outputImage) { 
+void PascalProcessor::convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage) {
+    if (outputImage.channels() == 1) {
+        ::convertSegmentationToPascal(inference, channels, outputImage);
+    } else if (outputImage.channels() == 3) {
+        ::convertSegmentationToPascal(inference, channels, outputImage, pascalColors);
+    } else {
+        throw exception("Unexpected output image channel count. 1 or 3 is expected.");
+    }
+}
+
+void convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage) { 
+#pragma omp parallel for   
+    for (int y = 0; y < outputImage.rows; ++y) {
+#pragma omp parallel for
+        for (int x = 0; x < outputImage.cols; ++x) {
+            const auto inferenceBegin = inference + (y * outputImage.cols + x) * channels;      
+            const auto maxChannel = std::max_element(inferenceBegin, inferenceBegin + channels);
+            const size_t colorIndex = std::distance(inferenceBegin, maxChannel);
+            auto point = outputImage.data + (y * outputImage.cols + x) * outputImage.channels();        
+            *point = colorIndex;
+        }
+    }
+}
+
+void convertSegmentationToPascal(const float* inference, size_t channels, cv::Mat& outputImage, const cv::Scalar* pascalColors) { 
 #pragma omp parallel for   
     for (int y = 0; y < outputImage.rows; ++y) {
 #pragma omp parallel for
@@ -98,10 +132,11 @@ void PascalProcessor::convertSegmentationToPascal(float* inference, size_t chann
             const auto inferenceBegin = inference + (y * outputImage.cols + x) * channels;		
             const auto maxChannel = std::max_element(inferenceBegin, inferenceBegin + channels);
             const size_t colorIndex = std::distance(inferenceBegin, maxChannel);
-            auto point = outputImage(cv::Range(y, y + 1), cv::Range(x, x + 1));        
-            point.data[0] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](2));
-            point.data[1] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](1));
-            point.data[2] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](0));
+            auto point = outputImage.data + (y * outputImage.cols + x) * outputImage.channels();        
+            point[0] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](2));
+            point[1] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](1));
+            point[2] = cv::saturate_cast<uchar>(255.0 * pascalColors[colorIndex](0));
         }
     }
 }
+
