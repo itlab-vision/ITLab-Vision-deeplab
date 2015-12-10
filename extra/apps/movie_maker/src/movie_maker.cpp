@@ -95,6 +95,8 @@ void MovieMaker::createVideo(const std::vector<std::string> &setNames,
     }
     
     // create legend
+    std::cout << "Checking the presense of object classes " <<
+                 "and creating the legend..." << std::endl;
     cv::Mat legend;
     createVOCLegend(imagesSet, legend);
     
@@ -116,6 +118,7 @@ void MovieMaker::createVideo(const std::vector<std::string> &setNames,
     legend.copyTo(frame(legendRect));
     
     //create video writer
+    std::cout << "Making video..." << std::endl;
     cv::VideoWriter videoWriter;
     videoWriter.open(outputFileName, CV_FOURCC('D', 'I', 'V', 'X'), fps,
         cv::Size(frame.cols, frame.rows));
