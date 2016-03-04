@@ -159,7 +159,9 @@ bool loadImage(const std::string& fileName, cv::Mat& image) {
     return true;
 }
 
-void listDirectory(const std::string& path, const std::string& pattern, bool stripExtension, std::vector<std::string>& fileNames) {
+void listDirectory(const std::string& path, const std::string& pattern, 
+    bool stripExtension, std::vector<std::string>& fileNames) 
+{
     DIR* dir = opendir(path.c_str());
     if (dir == NULL) {
         throw exception("Error opening dir: '" + path + "'.");
@@ -192,7 +194,9 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
     closedir(dir);
 }
 
-void generateImageNames(const std::vector<std::string>& list, const std::string& stripPattern, std::vector<std::string>& out) {
+void generateImageNames(const std::vector<std::string>& list, 
+    const std::string& stripPattern, std::vector<std::string>& out) 
+{
     for (auto it = list.cbegin(), iend = list.cend(); it != iend; ++it) {
         size_t pos = (*it).find(stripPattern);
         if (pos != std::string::npos) {
@@ -229,13 +233,15 @@ int main(int argc, char* argv[]) {
     const clock_t timeStart = clock();
     for (size_t i = 0; i < featureNamesList.size(); ++i) {
         if (i % 100 == 0) {
-            std::cout << "Processing " << i << " entry from " << featureNamesList.size() << " ..." << std::endl;
+            std::cout << "Processing " << i << " entry from " << 
+                featureNamesList.size() << " ..." << std::endl;
         }
 
         fileName = inp.imageDir + "/" + imageNamesList[i] + ".jpg";
         
         if (loadImage(fileName, loadedImage) == false) {
-            std::cerr << "Failed to open image: '" << fileName << "'. Skipping." << std::endl;
+            std::cerr << "Failed to open image: '" << 
+                fileName << "'. Skipping." << std::endl;
             continue;
         }
         int featuresRows = loadedImage.rows;
@@ -250,7 +256,8 @@ int main(int argc, char* argv[]) {
         const bool transpose = true;
         float* features = NULL;
         int featuresChannels;
-        LoadMatFile(fileName, features, featuresRows, featuresColumns, featuresChannels, transpose);
+        LoadMatFile(fileName, features, featuresRows, 
+            featuresColumns, featuresChannels, transpose);
 
         // Setup the CRF model
         DenseCRF2D crf(featuresColumns, featuresRows, featuresChannels);
@@ -261,7 +268,9 @@ int main(int argc, char* argv[]) {
         crf.addPairwiseGaussian(inp.posXStd, inp.posYStd, inp.posW);
 
         // add a color dependent term (feature = xyrgb)
-        crf.addPairwiseBilateral(inp.bilateralXStd, inp.bilateralYStd, inp.bilateralRStd, inp.bilateralGStd, inp.bilateralBStd, img, inp.bilateralW);
+        crf.addPairwiseBilateral(inp.bilateralXStd, inp.bilateralYStd, 
+            inp.bilateralRStd, inp.bilateralGStd, inp.bilateralBStd, 
+            img, inp.bilateralW);
     
         // Do map inference
         short* map = new short[featuresRows * featuresColumns];
@@ -279,7 +288,8 @@ int main(int argc, char* argv[]) {
         delete[] map;
     }
 
-    std::cout << "Time for inference: " << (double(clock() - timeStart) / CLOCKS_PER_SEC) << std::endl;
+    std::cout << "Time for inference: " << 
+        (double(clock() - timeStart) / CLOCKS_PER_SEC) << std::endl;
 
     return 0;
 }
