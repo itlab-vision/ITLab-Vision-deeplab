@@ -1,5 +1,5 @@
-#ifndef MAT_PROCESSING_H
-#define MAT_PROCESSING_H
+#ifndef MAT_PROCESSING_HPP
+#define MAT_PROCESSING_HPP
 
 #include <iostream>
 #include <string>       
@@ -25,8 +25,11 @@ template <typename T>
 void ReshapeToMatlabFormat(const T* map, int rows, int cols, T* result);
 
 
+
 template <typename T>
-void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int& channels, bool transpose) {
+void LoadMatFile(const std::string& fileName, T*& data, 
+    int rows, int cols, int& channels, bool transpose) 
+{
     mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
     if (matfp == NULL) {
         throw exception("Error opening MAT file: '" + fileName + "'.");
@@ -42,12 +45,14 @@ void LoadMatFile(const std::string& fileName, T*& data, int rows, int cols, int&
     if (matvar->class_type != matio_class_map<T>()) {
         Mat_VarFree(matvar);
         Mat_Close(matfp);
-        throw exception("Field 'data' must be of the right class (single/double). In MAT file: '" + fileName + "'.");
+        throw exception("Field 'data' must be of the" 
+            "right class (single/double). In MAT file: '" + fileName + "'.");
     }
     if ((4 <= matvar->rank) && (matvar->dims[3] != 1)) {
         Mat_VarFree(matvar);
         Mat_Close(matfp);
-        throw exception("Field 'data' cannot have ndims > 3. In MAT file: '" + fileName + "'.");
+        throw exception("Field 'data' cannot have"
+            " ndims > 3. In MAT file: '" + fileName + "'.");
     }
 
     int fileSize = 1;
@@ -128,4 +133,4 @@ void ReshapeToMatlabFormat(const T* map, int rows, int cols, T* result) {
     }
 }
 
-#endif // MAT_PROCESSING_H
+#endif // MAT_PROCESSING_HPP

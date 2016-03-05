@@ -1,5 +1,5 @@
-#ifndef BIN_PROCESSING_H
-#define BIN_PROCESSING_H
+#ifndef BIN_PROCESSING_HPP
+#define BIN_PROCESSING_HPP
 
 #include <fstream>
 #include <ios>
@@ -10,10 +10,14 @@
 
 
 template <typename T>
-void LoadBinFile(const std::string& fileName, T* data, int& rows, int& cols, int& channels);
+void LoadBinFile(const std::string& fileName, T* data,
+	int& rows, int& cols, int& channels);
 
 template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels);
+void SaveBinFile(const std::string& fileName, const T* data,
+	int rows, int cols, int channels);
+
+
 
 
 template <typename T>
@@ -36,7 +40,9 @@ void LoadBinFile(const std::string& fileName, T* data, int& rows, int& cols, int
 }
 
 template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels) {
+void SaveBinFile(const std::string& fileName, const T* data,
+	int rows, int cols, int channels) 
+{
     std::ofstream ofs(fileName.c_str(), std::ios_base::out | std::ios_base::binary);
 
     if (ofs.is_open() == false) {
@@ -54,4 +60,4 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 }
 
 
-#endif // BIN_PROCESSING_H
+#endif // BIN_PROCESSING_HPP
