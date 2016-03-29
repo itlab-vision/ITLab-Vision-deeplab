@@ -2,20 +2,20 @@
 
 This document is Deeplab installation guide. Here you can find step-by-step
 instructions to install dependencies and Deeplab itself:
-- [CUDA](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#cuda)
-- [Boost](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#boost)
-- [Glog](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#glog)
-- [Gflags](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#gflags)
-- [Atlas](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#atlas)
-- [HDF5](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#hdf5)
-- [leveldb](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#leveldb)
-- [lmdb](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#lmdb)
-- [Snappy](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#snappy)
-- [OpenCV](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#opencv)
-- [ProtoBuf](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#protobuf)
-- [MATIO](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#matio)
-- [Deeplab](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#deeplab)
-- [Dense CRF](https://github.com/ITLab-Vision/ITLab-Vision-deeplab/blob/installation-guide/InstallationGuide.md#dense-crf)
+- [CUDA](#cuda)
+- [Boost](#boost)
+- [Glog](#glog)
+- [Gflags](#gflags)
+- [Atlas](#atlas)
+- [HDF5](#hdf5)
+- [leveldb](#leveldb)
+- [lmdb](#lmdb)
+- [Snappy](#snappy)
+- [OpenCV](#opencv)
+- [ProtoBuf](#protobuf)
+- [MATIO](#matio)
+- [Deeplab](#deeplab)
+- [Dense CRF](#dense-crf)
 
 ###CUDA
 
