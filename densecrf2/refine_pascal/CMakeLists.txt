@@ -16,10 +16,10 @@ file(GLOB dense_inference_sources dense_inference.c*)
 add_executable(refine_pascal ${dense_inference_sources})
 add_dependencies(refine_pascal denseCRF)
 target_link_libraries(refine_pascal
-	denseCRF
-	${MATIO_LIBRARIES}
-	${OpenCV_LIBS}
+    denseCRF
+    ${MATIO_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 
 # Install
-install(TARGETS refine_pascal mat_to_png DESTINATION bin)
+install(TARGETS refine_pascal DESTINATION bin)
