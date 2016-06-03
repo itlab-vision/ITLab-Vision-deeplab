@@ -34,7 +34,7 @@ def show_help():
     print(__doc__)
 
 
-def class_conformance_r(p):
+def class_conformance_r(c):
 	if (c == 0):
 		return 0
 	if (c == 1):
@@ -80,7 +80,7 @@ def class_conformance_r(p):
     return 0
 
 
-def class_conformance_g(p):
+def class_conformance_g(c):
 	if (c == 0):
 		return 0
 	if (c == 1):
@@ -126,7 +126,7 @@ def class_conformance_g(p):
     return 0
 
 
-def class_conformance_b(p):
+def class_conformance_b(c):
 	if (c == 0):
 		return 0
 	if (c == 1):
