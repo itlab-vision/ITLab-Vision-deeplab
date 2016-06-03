@@ -7,6 +7,16 @@
 
 function [] = blobmat2png(mat_dir, init_jpg_dir, color_map_file, png_dir)
 
+if (exist(mat_dir, 'dir') == 0)
+    error('Failed to open a dir: "%s"', mat_dir);
+end
+if (exist(init_jpg_dir, 'dir') == 0)
+    error('Failed to open a dir: "%s"', init_jpg_dir);
+end
+if (exist(png_dir, 'dir') == 0) 
+    mkdir(png_dir);
+end
+
 % list all .mat-files
 mat_files = dir(mat_dir);
 % list all .jpg-files
@@ -15,7 +25,7 @@ jpg_files = dir(init_jpg_dir);
 color_map = load(color_map_file);
 color_map = color_map.colormap;
 
-for i = 1 : length(mat_files)
+for i = 1 : numel(mat_files)
     if (mat_files(i).isdir)
         continue;
     end
