@@ -35,140 +35,140 @@ def show_help():
 
 
 def class_conformance_r(c):
-	if (c == 0):
-		return 0
-	if (c == 1):
-		return 128
-	if (c == 2):
-		return 0
-	if (c == 3):
-		return 128
-	if (c == 4):
-		return 0
-	if (c == 5):
-		return 128
-	if (c == 6):
-		return 0
-	if (c == 7):
-		return 128
-	if (c == 8):
-		return 64
-	if (c == 9):
-		return 191
-	if (c == 10):
-		return 64
-	if (c == 11):
-		return 191
-	if (c == 12):
-		return 64
-	if (c == 13):
-		return 191
-	if (c == 14):
-		return 64
-	if (c == 15):
-		return 191
-	if (c == 16):
-		return 0
-	if (c == 17):
-		return 128
-	if (c == 18):
-		return 0
-	if (c == 19):
-		return 128
-	if (c == 20):
-		return 0
+    if (c == 0):
+        return 0
+    if (c == 1):
+        return 128
+    if (c == 2):
+        return 0
+    if (c == 3):
+        return 128
+    if (c == 4):
+        return 0
+    if (c == 5):
+        return 128
+    if (c == 6):
+        return 0
+    if (c == 7):
+        return 128
+    if (c == 8):
+        return 64
+    if (c == 9):
+        return 191
+    if (c == 10):
+        return 64
+    if (c == 11):
+        return 191
+    if (c == 12):
+        return 64
+    if (c == 13):
+        return 191
+    if (c == 14):
+        return 64
+    if (c == 15):
+        return 191
+    if (c == 16):
+        return 0
+    if (c == 17):
+        return 128
+    if (c == 18):
+        return 0
+    if (c == 19):
+        return 128
+    if (c == 20):
+        return 0
     return 0
 
 
 def class_conformance_g(c):
-	if (c == 0):
-		return 0
-	if (c == 1):
-		return 0
-	if (c == 2):
-		return 128
-	if (c == 3):
-		return 128
-	if (c == 4):
-		return 0
-	if (c == 5):
-		return 0
-	if (c == 6):
-		return 128
-	if (c == 7):
-		return 128
-	if (c == 8):
-		return 0
-	if (c == 9):
-		return 0
-	if (c == 10):
-		return 128
-	if (c == 11):
-		return 128
-	if (c == 12):
-		return 0
-	if (c == 13):
-		return 0
-	if (c == 14):
-		return 127
-	if (c == 15):
-		return 128
-	if (c == 16):
-		return 64
-	if (c == 17):
-		return 64
-	if (c == 18):
-		return 191
-	if (c == 19):
-		return 191
-	if (c == 20):
-		return 64
+    if (c == 0):
+        return 0
+    if (c == 1):
+        return 0
+    if (c == 2):
+        return 128
+    if (c == 3):
+        return 128
+    if (c == 4):
+        return 0
+    if (c == 5):
+        return 0
+    if (c == 6):
+        return 128
+    if (c == 7):
+        return 128
+    if (c == 8):
+        return 0
+    if (c == 9):
+        return 0
+    if (c == 10):
+        return 128
+    if (c == 11):
+        return 128
+    if (c == 12):
+        return 0
+    if (c == 13):
+        return 0
+    if (c == 14):
+        return 127
+    if (c == 15):
+        return 128
+    if (c == 16):
+        return 64
+    if (c == 17):
+        return 64
+    if (c == 18):
+        return 191
+    if (c == 19):
+        return 191
+    if (c == 20):
+        return 64
     return 0
 
 
 def class_conformance_b(c):
-	if (c == 0):
-		return 0
-	if (c == 1):
-		return 0
-	if (c == 2):
-		return 0
-	if (c == 3):
-		return 0
-	if (c == 4):
-		return 128
-	if (c == 5):
-		return 128
-	if (c == 6):
-		return 128
-	if (c == 7):
-		return 128
-	if (c == 8):
-		return 0
-	if (c == 9):
-		return 0
-	if (c == 10):
-		return 0
-	if (c == 11):
-		return 0
-	if (c == 12):
-		return 128
-	if (c == 13):
-		return 128
-	if (c == 14):
-		return 128
-	if (c == 15):
-		return 128
-	if (c == 16):
-		return 0
-	if (c == 17):
-		return 0
-	if (c == 18):
-		return 0
-	if (c == 19):
-		return 0
-	if (c == 20):
-		return 128
+    if (c == 0):
+        return 0
+    if (c == 1):
+        return 0
+    if (c == 2):
+        return 0
+    if (c == 3):
+        return 0
+    if (c == 4):
+        return 128
+    if (c == 5):
+        return 128
+    if (c == 6):
+        return 128
+    if (c == 7):
+        return 128
+    if (c == 8):
+        return 0
+    if (c == 9):
+        return 0
+    if (c == 10):
+        return 0
+    if (c == 11):
+        return 0
+    if (c == 12):
+        return 128
+    if (c == 13):
+        return 128
+    if (c == 14):
+        return 128
+    if (c == 15):
+        return 128
+    if (c == 16):
+        return 0
+    if (c == 17):
+        return 0
+    if (c == 18):
+        return 0
+    if (c == 19):
+        return 0
+    if (c == 20):
+        return 128
     return 0
 
 
