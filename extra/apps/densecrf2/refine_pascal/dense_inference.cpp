@@ -30,15 +30,16 @@
 
 #include <ctime>
 #include <fstream>    
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 #include <dirent.h>
 #include <fnmatch.h>
 
-#include "densecrf.h"
-#include "exception.hpp"
 #include "bin_processing.hpp"
+#include "densecrf.h"
+#include "find_files.hpp"
 #include "mat_processing.hpp"
         
 #include "opencv2/highgui/highgui.hpp"
@@ -119,7 +120,7 @@ InputData::InputData(int argc, char** argv)
             bilateralGStd = atof(argv[++k]);
         } else if (std::strcmp(argv[k], "-bb")==0 && k+1!=argc) {
             bilateralBStd = atof(argv[++k]);
-        } 
+        }
     }
 }
 
@@ -157,41 +158,6 @@ bool loadImage(const std::string& fileName, cv::Mat& image) {
     default: { /*none*/ }
     }
     return true;
-}
-
-void listDirectory(const std::string& path, const std::string& pattern, 
-    bool stripExtension, std::vector<std::string>& fileNames) 
-{
-    DIR* dir = opendir(path.c_str());
-    if (dir == NULL) {
-        throw exception("Error opening dir: '" + path + "'.");
-    }
-
-    dirent* entry = readdir(dir);
-    if (entry == NULL) {
-	    throw exception("Directory : '" + path + "' is empty!");
-    }
-
-    while (entry != NULL) {
-        DIR* testEntry = opendir(entry->d_name);
-        
-        if (testEntry == NULL) { // if not a directory
-            if (fnmatch(pattern.c_str(), entry->d_name, 0) == 0) {
-                if (stripExtension == true) {
-                    std::string tmp(entry->d_name);                    
-                    fileNames.emplace_back(std::move( tmp.substr(0, tmp.rfind(".")) ));
-                } else {
-                    fileNames.emplace_back(entry->d_name);
-                }
-            }
-        } else {
-            closedir(testEntry);
-        }
-	
-	    entry = readdir(dir);
-    }
-
-    closedir(dir);
 }
 
 void generateImageNames(const std::vector<std::string>& list, 
@@ -256,7 +222,7 @@ int main(int argc, char* argv[]) {
         const bool transpose = true;
         float* features = NULL;
         int featuresChannels;
-        LoadMatFile(fileName, features, featuresRows, 
+        LoadMatFile(fileName, features, 0, featuresRows, 
             featuresColumns, featuresChannels, transpose);
 
         // Setup the CRF model

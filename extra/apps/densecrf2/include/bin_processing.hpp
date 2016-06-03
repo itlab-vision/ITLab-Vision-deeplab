@@ -5,19 +5,14 @@
 #include <ios>
 #include <iostream>
 #include <string>
-
-#include "exception.hpp"
+#include <stdexcept>
 
 
 template <typename T>
-void LoadBinFile(const std::string& fileName, T* data,
-	int& rows, int& cols, int& channels);
+void LoadBinFile(const std::string& fileName, T* data, int& rows, int& cols, int& channels);
 
 template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data,
-	int rows, int cols, int channels);
-
-
+void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels);
 
 
 template <typename T>
@@ -25,7 +20,7 @@ void LoadBinFile(const std::string& fileName, T* data, int& rows, int& cols, int
     std::ifstream ifs(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
 
     if (ifs.is_open() == false) {
-        throw exception("Fail to open file: '" + fileName + "'.");
+        throw std::runtime_error("Fail to open file: '" + fileName + "'.");
     }
 
     ifs.read(reinterpret_cast<char*>(&rows), sizeof(int));
@@ -40,13 +35,11 @@ void LoadBinFile(const std::string& fileName, T* data, int& rows, int& cols, int
 }
 
 template <typename T>
-void SaveBinFile(const std::string& fileName, const T* data,
-	int rows, int cols, int channels) 
-{
+void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols, int channels) {
     std::ofstream ofs(fileName.c_str(), std::ios_base::out | std::ios_base::binary);
 
     if (ofs.is_open() == false) {
-        throw exception("Fail to open file: '" + fileName + "'.");
+        throw std::runtime_error("Fail to open file: '" + fileName + "'.");
     }    
 
     ofs.write(reinterpret_cast<const char*>(&rows), sizeof(int));

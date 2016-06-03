@@ -1,24 +1,14 @@
-# Packages
-include_directories(${DenseCRF_INCLUDE_DIRS})
-
-include_directories(${Util_INCLUDE_DIRS})
-
-find_package(MATIO REQUIRED)
-include_directories(${MATIO_INCLUDE_DIRS})
-
-find_package(OpenCV COMPONENTS core highgui imgproc REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-
-# Sources
-file(GLOB dense_inference_sources dense_inference.c*)
+set(headers "")
+set(sources dense_inference.cpp)
 
 # Build
-add_executable(refine_pascal ${dense_inference_sources})
-add_dependencies(refine_pascal denseCRF)
+add_executable(refine_pascal ${headers} ${sources})
 target_link_libraries(refine_pascal
     denseCRF
     ${MATIO_LIBRARIES}
+    ${HDF5_LIBRARIES}
     ${OpenCV_LIBS}
+    ${Util_LIBS}
 )
 
 # Install
