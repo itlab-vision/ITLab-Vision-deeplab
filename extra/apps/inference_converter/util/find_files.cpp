@@ -2,19 +2,20 @@
 
 #include <dirent.h>
 #include <fnmatch.h>
+#include <stdexcept>
 
-#include "exception.hpp"
-
-
-void listDirectory(const std::string& path, const std::string& pattern, bool stripExtension, std::vector<std::string>& fileNames) {
+void listDirectory(const std::string& path, const std::string& pattern, 
+    bool stripExtension, std::vector<std::string>& fileNames) 
+{
     DIR* dir = opendir(path.c_str());
     if (dir == NULL) {
-        throw exception("Error opening dir: '" + path + "'.");
+        throw std::runtime_error("Error opening dir: '" + path + "'.");
     }
 
     dirent* entry = readdir(dir);
     if (entry == NULL) {
-        throw exception("Directory : '" + path + "' is empty!");
+        closedir(dir);
+        throw std::runtime_error("Directory : '" + path + "' is empty!");
     }
 
     while (entry != NULL) {
@@ -24,7 +25,7 @@ void listDirectory(const std::string& path, const std::string& pattern, bool str
             if (fnmatch(pattern.c_str(), entry->d_name, 0) == 0) {
                 if (stripExtension == true) {
                     std::string tmp(entry->d_name);                    
-                    fileNames.emplace_back(std::move( tmp.substr(0, tmp.rfind(".")) ));
+                    fileNames.emplace_back(tmp.substr(0, tmp.rfind(".")));
                 } else {
                     fileNames.emplace_back(entry->d_name);
                 }

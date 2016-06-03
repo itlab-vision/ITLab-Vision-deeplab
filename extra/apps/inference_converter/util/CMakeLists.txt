@@ -1,8 +1,4 @@
-project(${Util_LIBS})
+set(headers "")
+set(sources find_files.cpp)
 
-# Sources
-file(GLOB headers *.h*)
-file(GLOB sources *.c*)
-
-# Build
-add_library(util STATIC ${headers} ${sources})
+add_library(${Util_LIBS} STATIC ${headers} ${sources})
