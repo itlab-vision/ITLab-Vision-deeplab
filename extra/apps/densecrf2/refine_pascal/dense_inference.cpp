@@ -29,7 +29,7 @@
 */
 
 #include <ctime>
-#include <fstream>    
+#include <fstream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -41,7 +41,7 @@
 #include "densecrf.h"
 #include "find_files.hpp"
 #include "mat_processing.hpp"
-        
+
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
@@ -90,7 +90,7 @@ std::ostream& operator<<(std::ostream& os, const InputData& inp) {
         << "Bi_B_Std:    " << inp.bilateralBStd << std::endl;
 }
 
-InputData::InputData(int argc, char** argv)   
+InputData::InputData(int argc, char** argv)
 {
     init();
     for(int k = 1; k < argc; ++k) {
@@ -149,7 +149,7 @@ bool loadImage(const std::string& fileName, cv::Mat& image) {
     }
     //convert to RGB pixel format
     switch (image.type()) {
-    case CV_8UC3: 
+    case CV_8UC3:
         cv::cvtColor(image, image, CV_BGR2RGB);
         break;
     case CV_8UC4:
@@ -160,8 +160,8 @@ bool loadImage(const std::string& fileName, cv::Mat& image) {
     return true;
 }
 
-void generateImageNames(const std::vector<std::string>& list, 
-    const std::string& stripPattern, std::vector<std::string>& out) 
+void generateImageNames(const std::vector<std::string>& list,
+    const std::string& stripPattern, std::vector<std::string>& out)
 {
     for (auto it = list.cbegin(), iend = list.cend(); it != iend; ++it) {
         size_t pos = (*it).find(stripPattern);
@@ -180,16 +180,16 @@ int main(int argc, char* argv[]) {
     }
     if (inp.featureDir.empty() == true) {
         std::cerr << "Features directory not set. Exiting.";
-        return 2; // magic      
+        return 2; // magic
     }
     if (inp.outputDir.empty() == true) {
         std::cerr << "Output directory not set. Exiting.";
         return 3; // magic
     }
-    
+
     std::vector<std::string> featureNamesList;
     listDirectory(inp.featureDir, "*.mat", true, featureNamesList);
-    
+
     std::vector<std::string> imageNamesList;
     generateImageNames(featureNamesList, "_blob_0", imageNamesList);
 
@@ -199,14 +199,14 @@ int main(int argc, char* argv[]) {
     const clock_t timeStart = clock();
     for (size_t i = 0; i < featureNamesList.size(); ++i) {
         if (i % 100 == 0) {
-            std::cout << "Processing " << i << " entry from " << 
+            std::cout << "Processing " << i << " entry from " <<
                 featureNamesList.size() << " ..." << std::endl;
         }
 
         fileName = inp.imageDir + "/" + imageNamesList[i] + ".jpg";
-        
+
         if (loadImage(fileName, loadedImage) == false) {
-            std::cerr << "Failed to open image: '" << 
+            std::cerr << "Failed to open image: '" <<
                 fileName << "'. Skipping." << std::endl;
             continue;
         }
@@ -216,13 +216,13 @@ int main(int argc, char* argv[]) {
 
         fileName = inp.featureDir + "/" + featureNamesList[i] + ".mat";
 
-        /* CRF works with the next image data order: data[height][width][channels] 
+        /* CRF works with the next image data order: data[height][width][channels]
          * so we have to transpose loaded mat file to row-order
         */
         const bool transpose = true;
         float* features = NULL;
         int featuresChannels;
-        LoadMatFile(fileName, features, 0, featuresRows, 
+        LoadMatFile(fileName, features, 0, featuresRows,
             featuresColumns, featuresChannels, transpose);
 
         // Setup the CRF model
@@ -234,10 +234,10 @@ int main(int argc, char* argv[]) {
         crf.addPairwiseGaussian(inp.posXStd, inp.posYStd, inp.posW);
 
         // add a color dependent term (feature = xyrgb)
-        crf.addPairwiseBilateral(inp.bilateralXStd, inp.bilateralYStd, 
-            inp.bilateralRStd, inp.bilateralGStd, inp.bilateralBStd, 
+        crf.addPairwiseBilateral(inp.bilateralXStd, inp.bilateralYStd,
+            inp.bilateralRStd, inp.bilateralGStd, inp.bilateralBStd,
             img, inp.bilateralW);
-    
+
         // Do map inference
         short* map = new short[featuresRows * featuresColumns];
         crf.map(inp.maxIterations, map);
@@ -248,13 +248,13 @@ int main(int argc, char* argv[]) {
         // save results
         fileName = inp.outputDir + "/" + imageNamesList[i] + ".bin";
         SaveBinFile(fileName, result, featuresRows, featuresColumns, 1);
-        
+
         delete[] result;
         delete[] features;
         delete[] map;
     }
 
-    std::cout << "Time for inference: " << 
+    std::cout << "Time for inference: " <<
         (double(clock() - timeStart) / CLOCKS_PER_SEC) << std::endl;
 
     return 0;

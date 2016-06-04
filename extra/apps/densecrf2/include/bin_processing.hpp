@@ -40,7 +40,7 @@ void SaveBinFile(const std::string& fileName, const T* data, int rows, int cols,
 
     if (ofs.is_open() == false) {
         throw std::runtime_error("Fail to open file: '" + fileName + "'.");
-    }    
+    }
 
     ofs.write(reinterpret_cast<const char*>(&rows), sizeof(int));
     ofs.write(reinterpret_cast<const char*>(&cols), sizeof(int));

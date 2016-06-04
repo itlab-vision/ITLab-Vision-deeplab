@@ -9,7 +9,7 @@ add_library(denseCRF STATIC ${headers} ${sources})
 
 # Install
 
-install(TARGETS denseCRF 
+install(TARGETS denseCRF
 	ARCHIVE DESTINATION lib
 	INCLUDES DESTINATION include
 )
