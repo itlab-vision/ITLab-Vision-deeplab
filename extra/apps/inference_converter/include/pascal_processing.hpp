@@ -11,7 +11,7 @@ class PascalProcessor {
 public:
 	PascalProcessor(size_t classCount = 21, size_t mapSize = 513);
 
-    void convertMatToPng(const std::vector<std::string>& matFileNames, 
+    void convertMatToPng(const std::vector<std::string>& matFileNames,
         const std::vector<std::string>& imageFileNames,
         const std::string& inferenceDir,
         const std::string& datasetDir,
@@ -24,7 +24,7 @@ private:
     const size_t mapSize;
     const size_t classCount;
 
-    void convertSegmentation(const float* inference, size_t channels, 
+    void convertSegmentation(const float* inference, size_t channels,
         cv::Mat& outputImage);
     void writeSegmentedImage(const std::string& fileName, const cv::Mat& data);
 };

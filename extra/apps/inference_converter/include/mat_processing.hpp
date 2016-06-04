@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <memory>
-#include <string>       
+#include <string>
 #include <stdexcept>
 
 #include "matio.h"
@@ -18,12 +18,13 @@ template <> enum matio_classes matio_class_map<unsigned int>() { return MAT_C_UI
 /*
  * Reads .mat file 'fileName' and writes data to 'data'.
  * Transpose stands for transposition of elements from [channels][rows][cols] order
- * to [rows][cols][channels] order.
+ * to [rows][cols][channels] order. If maxDataSize == 0 or data == NULL new
+ * data storage is created.
 */
 template <typename T>
-void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize, 
+void LoadMatFile(const std::string& fileName, T*& data, size_t maxDataSize,
     int rows, int cols,
-    int& channels, bool transpose = false, 
+    int& channels, bool transpose = false,
     void* buffer = NULL, size_t bufferSize = 0);
 
 /*
@@ -34,14 +35,10 @@ void ReshapeToMatlabFormat(const T* map, int rows, int cols, T* result);
 
 
 template <typename T>
-void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize, 
-    int rows, int cols, int& channels, bool transpose, 
-    void* buffer, size_t bufferSize) 
+void LoadMatFile(const std::string& fileName, T*& data, size_t maxDataSize,
+    int rows, int cols, int& channels, bool transpose,
+    void* buffer, size_t bufferSize)
 {
-    if (data == NULL) {
-        throw std::runtime_error("Data pointer is null.");
-    }
-
     mat_t* matfp = Mat_Open(fileName.c_str(), MAT_ACC_RDONLY);
     if (matfp == NULL) {
         throw std::runtime_error("Error opening MAT file: '" + fileName + "'.");
@@ -71,15 +68,24 @@ void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize,
     channels = matvar->dims[2];
     const int fileSize = matCols * matRows * channels;
 
-    size_t dataSize = rows * cols * channels;
-    if (maxDataSize < dataSize) {
-        dataSize = maxDataSize;
-    }
-
     if ((matCols < cols) || (matRows < rows)) {
         Mat_VarFree(matvar);
-        Mat_Close(matfp);     
-        throw std::runtime_error("Size of requesting matrix is bigger than size of matrix in file.");
+        Mat_Close(matfp);
+        throw std::runtime_error("Size of requested matrix is bigger than size of matrix in file.");
+    }
+
+    const size_t dataSize = rows * cols * channels;
+    if ((maxDataSize != 0) && (maxDataSize < dataSize)) {
+        Mat_VarFree(matvar);
+        Mat_Close(matfp);
+        throw std::runtime_error("Size of requested matrix is bigger than allowed maximum.");
+    }
+    if ((maxDataSize == 0) && (data == NULL)) {
+        data = new T[dataSize];
+    } else if ((maxDataSize != 0) && (data == NULL) ) {
+        Mat_VarFree(matvar);
+        Mat_Close(matfp);
+        throw std::runtime_error("Data pointer is null while maxDataSize != 0.");
     }
 
     T* fileData = reinterpret_cast<T*>(buffer);
@@ -88,7 +94,7 @@ void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize,
         fileData = new T[fileSize];
         fileDataIsNew = true;
     }
-    
+
     const auto res = Mat_VarReadDataLinear(matfp, matvar, fileData, 0, 1, fileSize);
     Mat_VarFree(matvar);
     Mat_Close(matfp);
@@ -110,7 +116,7 @@ void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize,
                 for (int column = 0; column < cols; ++column) {
                     // fileData[channel][row][column] -> data[row][column][channel]
                     const int inInd  = column  + row    * matCols  + channel * channelSize;
-                    const int outInd = channel + column * channels + row     * outOffset;                                        
+                    const int outInd = channel + column * channels + row     * outOffset;
                     data[outInd] = fileData[inInd];
                 }
             }
@@ -122,8 +128,8 @@ void LoadMatFile(const std::string& fileName, T* data, size_t maxDataSize,
                 for (int column = 0; column < cols; ++column) {
                     // fileData[channel][column?][row]-> data[channel][column][row]
                     const int inInd  = row + column * matCols + channel * channelSize;
-                    const int outInd = row + column * rows    + channel * outputChannelSize; 
-                    data[outInd] = fileData[inInd]; 
+                    const int outInd = row + column * rows    + channel * outputChannelSize;
+                    data[outInd] = fileData[inInd];
                 }
             }
         }
