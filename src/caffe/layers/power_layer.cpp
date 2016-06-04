@@ -1,9 +1,7 @@
-#include <algorithm>
 #include <vector>
 
-#include "caffe/layer.hpp"
+#include "caffe/layers/power_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
 
@@ -99,5 +97,6 @@ STUB_GPU(PowerLayer);
 #endif
 
 INSTANTIATE_CLASS(PowerLayer);
-REGISTER_LAYER_CLASS(POWER, PowerLayer);
+REGISTER_LAYER_CLASS(Power);
+
 }  // namespace caffe

@@ -1,7 +1,6 @@
 #include <vector>
 
-#include "caffe/layer.hpp"
-#include "caffe/neuron_layers.hpp"
+#include "caffe/layers/absval_layer.hpp"
 #include "caffe/util/math_functions.hpp"
 
 namespace caffe {
@@ -10,7 +9,7 @@ template <typename Dtype>
 void AbsValLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   NeuronLayer<Dtype>::LayerSetUp(bottom, top);
-  CHECK_NE(top[0], bottom[0]) << this->type_name() << " Layer does not "
+  CHECK_NE(top[0], bottom[0]) << this->type() << " Layer does not "
     "allow in-place computation.";
 }
 
@@ -40,5 +39,6 @@ STUB_GPU(AbsValLayer);
 #endif
 
 INSTANTIATE_CLASS(AbsValLayer);
-REGISTER_LAYER_CLASS(ABSVAL, AbsValLayer);
+REGISTER_LAYER_CLASS(AbsVal);
+
 }  // namespace caffe

@@ -1,9 +1,9 @@
 #include <vector>
 
 #include "caffe/layer.hpp"
-#include "caffe/util/math_functions.hpp"
+#include "caffe/layers/interp_layer.hpp"
 #include "caffe/util/interp.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/util/math_functions.hpp"
 
 namespace caffe {
 
@@ -16,7 +16,7 @@ void InterpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   num_specs += interp_param.has_shrink_factor();
   num_specs += interp_param.has_height() && interp_param.has_width();
   CHECK_EQ(num_specs, 1) << "Output dimension specified either by "
-			 << "zoom factor or shrink factor or explicitly";
+       << "zoom factor or shrink factor or explicitly";
   pad_beg_ = interp_param.pad_beg();
   pad_end_ = interp_param.pad_end();
   CHECK_LE(pad_beg_, 0) << "Only supports non-pos padding (cropping) for now";
@@ -102,6 +102,6 @@ STUB_GPU(InterpLayer);
 
 
 INSTANTIATE_CLASS(InterpLayer);
-REGISTER_LAYER_CLASS(INTERP, InterpLayer);
+REGISTER_LAYER_CLASS(Interp);
 
 }  // namespace caffe

@@ -12,7 +12,7 @@
 
 namespace caffe {
 
-// Decaf gemm provides a simpler interface to the gemm functions, with the
+// Caffe gemm provides a simpler interface to the gemm functions, with the
 // limitation that the data has to be contiguous in memory.
 template <typename Dtype>
 void caffe_cpu_gemm(const CBLAS_TRANSPOSE TransA,
@@ -32,37 +32,6 @@ void caffe_axpy(const int N, const Dtype alpha, const Dtype* X,
 template <typename Dtype>
 void caffe_cpu_axpby(const int N, const Dtype alpha, const Dtype* X,
     const Dtype beta, Dtype* Y);
-
-// INPUT:
-// op(A), op(B): M x K
-// op(C): K x N
-// buf: M x K scratch to store op(A .* B) (can be one of A or B if not needed)
-// OUTPUT: (depending on TransA, TransC)
-// D = alpha * op(A .* B) * op(C) + beta * D, with size M X N
-template <typename Dtype>
-void caffe_cpu_dot_mul(const CBLAS_TRANSPOSE TransAB,
-   const CBLAS_TRANSPOSE TransC,
-   const int M, const int N, const int K,
-   const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype *C,
-   Dtype *buf,
-   const Dtype beta, Dtype *D);
-template <typename Dtype>
-void caffe_gpu_dot_mul(const CBLAS_TRANSPOSE TransAB,
-   const CBLAS_TRANSPOSE TransC,
-   const int M, const int N, const int K,
-   const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype *C,
-   Dtype *buf,
-   const Dtype beta, Dtype *D);
-
-// C := A*diag(x). if mode = CUBLAS_SIDE_RIGHT
-// C := diag(x)*A. if mode = CUBLAS_SIDE_LEFT
-// A, C have size M x N. If C is missing, then multiply A in-place.
-template <typename Dtype>
-void caffe_cpu_dgmm(cublasSideMode_t mode,
-    const int M, const int N, const Dtype *A, const Dtype *x, Dtype *C);
-template <typename Dtype>
-void caffe_cpu_dgmm(cublasSideMode_t mode, 
-    const int M, const int N, Dtype *A, const Dtype *x);
 
 template <typename Dtype>
 void caffe_copy(const int N, const Dtype *X, Dtype *Y);
@@ -96,9 +65,6 @@ template <typename Dtype>
 void caffe_div(const int N, const Dtype* a, const Dtype* b, Dtype* y);
 
 template <typename Dtype>
-void caffe_cpu_div_safe(const int N, const Dtype* a, const Dtype* b, Dtype* y);
-
-template <typename Dtype>
 void caffe_powx(const int n, const Dtype* a, const Dtype b, Dtype* y);
 
 unsigned int caffe_rng_rand();
@@ -123,6 +89,9 @@ template <typename Dtype>
 void caffe_exp(const int n, const Dtype* a, Dtype* y);
 
 template <typename Dtype>
+void caffe_log(const int n, const Dtype* a, Dtype* y);
+
+template <typename Dtype>
 void caffe_abs(const int n, const Dtype* a, Dtype* y);
 
 template <typename Dtype>
@@ -131,9 +100,6 @@ Dtype caffe_cpu_dot(const int n, const Dtype* x, const Dtype* y);
 template <typename Dtype>
 Dtype caffe_cpu_strided_dot(const int n, const Dtype* x, const int incx,
     const Dtype* y, const int incy);
-
-template <typename Dtype>
-int caffe_cpu_hamming_distance(const int n, const Dtype* x, const Dtype* y);
 
 // Returns the sum of the absolute values of the elements of vector x
 template <typename Dtype>
@@ -200,13 +166,6 @@ template <typename Dtype>
 void caffe_gpu_axpby(const int N, const Dtype alpha, const Dtype* X,
     const Dtype beta, Dtype* Y);
 
-template <typename Dtype>
-void caffe_gpu_dgmm(cublasSideMode_t mode, 
-    const int M, const int N, const Dtype *A, const Dtype *x, Dtype *C);
-template <typename Dtype>
-void caffe_gpu_dgmm(cublasSideMode_t mode, 
-    const int M, const int N, Dtype *A, const Dtype *x);
-
 void caffe_gpu_memcpy(const size_t N, const void *X, void *Y);
 
 template <typename Dtype>
@@ -239,13 +198,13 @@ template <typename Dtype>
 void caffe_gpu_div(const int N, const Dtype* a, const Dtype* b, Dtype* y);
 
 template <typename Dtype>
-void caffe_gpu_div_safe(const int N, const Dtype* a, const Dtype* b, Dtype* y);
-
-template <typename Dtype>
 void caffe_gpu_abs(const int n, const Dtype* a, Dtype* y);
 
 template <typename Dtype>
 void caffe_gpu_exp(const int n, const Dtype* a, Dtype* y);
+
+template <typename Dtype>
+void caffe_gpu_log(const int n, const Dtype* a, Dtype* y);
 
 template <typename Dtype>
 void caffe_gpu_powx(const int n, const Dtype* a, const Dtype b, Dtype* y);
@@ -271,10 +230,6 @@ void caffe_gpu_rng_bernoulli(const int n, const Dtype p, int* r);
 
 template <typename Dtype>
 void caffe_gpu_dot(const int n, const Dtype* x, const Dtype* y, Dtype* out);
-
-template <typename Dtype>
-uint32_t caffe_gpu_hamming_distance(const int n, const Dtype* x,
-                                    const Dtype* y);
 
 template <typename Dtype>
 void caffe_gpu_asum(const int n, const Dtype* x, Dtype* y);
@@ -311,7 +266,7 @@ void caffe_gpu_##name<double>(const int n, const double* x, double* y) { \
       n, x, y); \
 }
 
-#endif  // CPU_ONLY
+#endif  // !CPU_ONLY
 
 }  // namespace caffe
 

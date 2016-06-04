@@ -1,10 +1,7 @@
-#include <algorithm>
-#include <cfloat>
 #include <vector>
 
-#include "caffe/layer.hpp"
+#include "caffe/layers/sigmoid_cross_entropy_loss_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
 
@@ -53,7 +50,7 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_cpu(
     const vector<Blob<Dtype>*>& top, const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
   if (propagate_down[1]) {
-    LOG(FATAL) << this->type_name()
+    LOG(FATAL) << this->type()
                << " Layer cannot backpropagate to label inputs.";
   }
   if (propagate_down[0]) {
@@ -71,9 +68,10 @@ void SigmoidCrossEntropyLossLayer<Dtype>::Backward_cpu(
 }
 
 #ifdef CPU_ONLY
-STUB_GPU(SigmoidCrossEntropyLossLayer);
+STUB_GPU_BACKWARD(SigmoidCrossEntropyLossLayer, Backward);
 #endif
 
 INSTANTIATE_CLASS(SigmoidCrossEntropyLossLayer);
-REGISTER_LAYER_CLASS(SIGMOID_CROSS_ENTROPY_LOSS, SigmoidCrossEntropyLossLayer);
+REGISTER_LAYER_CLASS(SigmoidCrossEntropyLoss);
+
 }  // namespace caffe

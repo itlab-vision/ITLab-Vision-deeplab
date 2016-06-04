@@ -1,4 +1,3 @@
-#include <stdio.h>  // for snprintf
 #include <string>
 #include <vector>
 
@@ -7,19 +6,18 @@
 
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
-#include "caffe/dataset_factory.hpp"
 #include "caffe/net.hpp"
 #include "caffe/proto/caffe.pb.h"
+#include "caffe/util/db.hpp"
+#include "caffe/util/format.hpp"
 #include "caffe/util/io.hpp"
-#include "caffe/vision_layers.hpp"
 
-using boost::shared_ptr;
 using caffe::Blob;
 using caffe::Caffe;
-using caffe::Dataset;
-using caffe::DatasetFactory;
 using caffe::Datum;
 using caffe::Net;
+using std::string;
+namespace db = caffe::db;
 
 template<typename Dtype>
 int feature_extraction_pipeline(int argc, char** argv);
@@ -42,7 +40,7 @@ int feature_extraction_pipeline(int argc, char** argv) {
     "  save_feature_dataset_name1[,name2,...]  num_mini_batches  db_type"
     "  [CPU/GPU] [DEVICE_ID=0]\n"
     "Note: you can extract multiple features in one pass by specifying"
-    " multiple feature blob names and dataset names seperated by ','."
+    " multiple feature blob names and dataset names separated by ','."
     " The names cannot contain white space characters and the number of blobs"
     " and datasets must be equal.";
     return 1;
@@ -52,7 +50,7 @@ int feature_extraction_pipeline(int argc, char** argv) {
   arg_pos = num_required_args;
   if (argc > arg_pos && strcmp(argv[arg_pos], "GPU") == 0) {
     LOG(ERROR)<< "Using GPU";
-    uint device_id = 0;
+    int device_id = 0;
     if (argc > arg_pos + 1) {
       device_id = atoi(argv[arg_pos + 1]);
       CHECK_GE(device_id, 0);
@@ -64,7 +62,6 @@ int feature_extraction_pipeline(int argc, char** argv) {
     LOG(ERROR) << "Using CPU";
     Caffe::set_mode(Caffe::CPU);
   }
-  Caffe::set_phase(Caffe::TEST);
 
   arg_pos = 0;  // the name of the executable
   std::string pretrained_binary_proto(argv[++arg_pos]);
@@ -97,8 +94,8 @@ int feature_extraction_pipeline(int argc, char** argv) {
    }
    */
   std::string feature_extraction_proto(argv[++arg_pos]);
-  shared_ptr<Net<Dtype> > feature_extraction_net(
-      new Net<Dtype>(feature_extraction_proto));
+  boost::shared_ptr<Net<Dtype> > feature_extraction_net(
+      new Net<Dtype>(feature_extraction_proto, caffe::TEST));
   feature_extraction_net->CopyTrainedLayersFrom(pretrained_binary_proto);
 
   std::string extract_feature_blob_names(argv[++arg_pos]);
@@ -121,46 +118,50 @@ int feature_extraction_pipeline(int argc, char** argv) {
 
   int num_mini_batches = atoi(argv[++arg_pos]);
 
-  std::vector<shared_ptr<Dataset<std::string, Datum> > > feature_dbs;
+  std::vector<boost::shared_ptr<db::DB> > feature_dbs;
+  std::vector<boost::shared_ptr<db::Transaction> > txns;
+  const char* db_type = argv[++arg_pos];
   for (size_t i = 0; i < num_features; ++i) {
     LOG(INFO)<< "Opening dataset " << dataset_names[i];
-    shared_ptr<Dataset<std::string, Datum> > dataset =
-        DatasetFactory<std::string, Datum>(argv[++arg_pos]);
-    CHECK(dataset->open(dataset_names.at(i), Dataset<std::string, Datum>::New));
-    feature_dbs.push_back(dataset);
+    boost::shared_ptr<db::DB> db(db::GetDB(db_type));
+    db->Open(dataset_names.at(i), db::NEW);
+    feature_dbs.push_back(db);
+    boost::shared_ptr<db::Transaction> txn(db->NewTransaction());
+    txns.push_back(txn);
   }
 
   LOG(ERROR)<< "Extacting Features";
 
   Datum datum;
-  const int kMaxKeyStrLength = 100;
-  char key_str[kMaxKeyStrLength];
-  std::vector<Blob<float>*> input_vec;
   std::vector<int> image_indices(num_features, 0);
   for (int batch_index = 0; batch_index < num_mini_batches; ++batch_index) {
-    feature_extraction_net->Forward(input_vec);
+    feature_extraction_net->Forward();
     for (int i = 0; i < num_features; ++i) {
-      const shared_ptr<Blob<Dtype> > feature_blob = feature_extraction_net
-          ->blob_by_name(blob_names[i]);
+      const boost::shared_ptr<Blob<Dtype> > feature_blob =
+        feature_extraction_net->blob_by_name(blob_names[i]);
       int batch_size = feature_blob->num();
       int dim_features = feature_blob->count() / batch_size;
       const Dtype* feature_blob_data;
       for (int n = 0; n < batch_size; ++n) {
-        datum.set_height(dim_features);
-        datum.set_width(1);
-        datum.set_channels(1);
+        datum.set_height(feature_blob->height());
+        datum.set_width(feature_blob->width());
+        datum.set_channels(feature_blob->channels());
         datum.clear_data();
         datum.clear_float_data();
-        feature_blob_data = feature_blob->cpu_data(n);
+        feature_blob_data = feature_blob->cpu_data() +
+            feature_blob->offset(n);
         for (int d = 0; d < dim_features; ++d) {
           datum.add_float_data(feature_blob_data[d]);
         }
-        int length = snprintf(key_str, kMaxKeyStrLength, "%d",
-            image_indices[i]);
-        CHECK(feature_dbs.at(i)->put(std::string(key_str, length), datum));
+        string key_str = caffe::format_int(image_indices[i], 10);
+
+        string out;
+        CHECK(datum.SerializeToString(&out));
+        txns.at(i)->Put(key_str, out);
         ++image_indices[i];
         if (image_indices[i] % 1000 == 0) {
-          CHECK(feature_dbs.at(i)->commit());
+          txns.at(i)->Commit();
+          txns.at(i).reset(feature_dbs.at(i)->NewTransaction());
           LOG(ERROR)<< "Extracted features of " << image_indices[i] <<
               " query images for feature blob " << blob_names[i];
         }
@@ -170,14 +171,13 @@ int feature_extraction_pipeline(int argc, char** argv) {
   // write the last batch
   for (int i = 0; i < num_features; ++i) {
     if (image_indices[i] % 1000 != 0) {
-      CHECK(feature_dbs.at(i)->commit());
+      txns.at(i)->Commit();
     }
     LOG(ERROR)<< "Extracted features of " << image_indices[i] <<
         " query images for feature blob " << blob_names[i];
-    feature_dbs.at(i)->close();
+    feature_dbs.at(i)->Close();
   }
 
   LOG(ERROR)<< "Successfully extracted the features!";
   return 0;
 }
-

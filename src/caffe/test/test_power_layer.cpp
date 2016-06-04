@@ -6,7 +6,7 @@
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/filler.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/power_layer.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
 #include "caffe/test/test_gradient_check_util.hpp"
@@ -74,7 +74,7 @@ class PowerLayerTest : public MultiDeviceTest<TypeParam> {
         }
       }
     }
-    GradientChecker<Dtype> checker(1e-2, 1e-2, 1701, 0., 0.01);
+    GradientChecker<Dtype> checker(1e-3, 1e-2, 1701, 0., 0.01);
     checker.CheckGradientEltwise(&layer, this->blob_bottom_vec_,
         this->blob_top_vec_);
   }

@@ -1,4 +1,3 @@
-#include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -6,7 +5,8 @@
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/filler.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/dropout_layer.hpp"
+#include "caffe/layers/pooling_layer.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
 #include "caffe/test/test_gradient_check_util.hpp"
@@ -88,8 +88,8 @@ TYPED_TEST(MaxPoolingDropoutTest, TestForward) {
 
 TYPED_TEST(MaxPoolingDropoutTest, TestBackward) {
   typedef typename TypeParam::Dtype Dtype;
-  Caffe::set_phase(Caffe::TRAIN);
   LayerParameter layer_param;
+  layer_param.set_phase(TRAIN);
   PoolingParameter* pooling_param = layer_param.mutable_pooling_param();
   pooling_param->set_kernel_size(3);
   pooling_param->set_stride(2);

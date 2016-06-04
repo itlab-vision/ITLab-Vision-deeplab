@@ -1,6 +1,4 @@
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -8,7 +6,7 @@
 #include "caffe/blob.hpp"
 #include "caffe/common.hpp"
 #include "caffe/filler.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/euclidean_loss_layer.hpp"
 
 #include "caffe/test/test_caffe_main.hpp"
 #include "caffe/test/test_gradient_check_util.hpp"
@@ -76,25 +74,9 @@ TYPED_TEST(EuclideanLossLayerTest, TestForward) {
   this->TestForward();
 }
 
-TYPED_TEST(EuclideanLossLayerTest, TestGradientL2) {
+TYPED_TEST(EuclideanLossLayerTest, TestGradient) {
   typedef typename TypeParam::Dtype Dtype;
   LayerParameter layer_param;
-  layer_param.mutable_euclidean_loss_param()->
-    set_type(EuclideanLossParameter_Type_L2);
-  const Dtype kLossWeight = 3.7;
-  layer_param.add_loss_weight(kLossWeight);
-  EuclideanLossLayer<Dtype> layer(layer_param);
-  layer.SetUp(this->blob_bottom_vec_, this->blob_top_vec_);
-  GradientChecker<Dtype> checker(1e-2, 1e-2, 1701);
-  checker.CheckGradientExhaustive(&layer, this->blob_bottom_vec_,
-      this->blob_top_vec_);
-}
-
-TYPED_TEST(EuclideanLossLayerTest, TestGradientL2sqrt) {
-  typedef typename TypeParam::Dtype Dtype;
-  LayerParameter layer_param;
-  layer_param.mutable_euclidean_loss_param()->
-    set_type(EuclideanLossParameter_Type_L2sqrt);
   const Dtype kLossWeight = 3.7;
   layer_param.add_loss_weight(kLossWeight);
   EuclideanLossLayer<Dtype> layer(layer_param);

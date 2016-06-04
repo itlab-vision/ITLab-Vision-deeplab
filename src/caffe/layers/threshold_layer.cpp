@@ -1,8 +1,6 @@
 #include <vector>
 
-#include "caffe/layer.hpp"
-#include "caffe/vision_layers.hpp"
-
+#include "caffe/layers/threshold_layer.hpp"
 
 namespace caffe {
 
@@ -29,5 +27,6 @@ STUB_GPU_FORWARD(ThresholdLayer, Forward);
 #endif
 
 INSTANTIATE_CLASS(ThresholdLayer);
-REGISTER_LAYER_CLASS(THRESHOLD, ThresholdLayer);
+REGISTER_LAYER_CLASS(Threshold);
+
 }  // namespace caffe

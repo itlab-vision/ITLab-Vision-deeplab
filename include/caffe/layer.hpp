@@ -9,7 +9,13 @@
 #include "caffe/common.hpp"
 #include "caffe/layer_factory.hpp"
 #include "caffe/proto/caffe.pb.h"
-#include "caffe/util/device_alternate.hpp"
+#include "caffe/util/math_functions.hpp"
+
+/**
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
 
 namespace caffe {
 
@@ -17,11 +23,11 @@ namespace caffe {
  * @brief An interface for the units of computation which can be composed into a
  *        Net.
  *
- * Layer&s must implement a Forward function, in which they take their input
- * (bottom) Blob&s (if any) and compute their output Blob&s (if any).
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
  * They may also implement a Backward function, in which they compute the error
- * gradients with respect to their input Blob&s, given the error gradients with
- * their output Blob&s.
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
  */
 template <typename Dtype>
 class Layer {
@@ -32,8 +38,9 @@ class Layer {
    * layer.
    */
   explicit Layer(const LayerParameter& param)
-    : layer_param_(param) {
-      // The only thing we do is to copy blobs if there are any.
+    : layer_param_(param), is_shared_(false) {
+      // Set phase and copy blobs (if there are any).
+      phase_ = param.phase();
       if (layer_param_.blobs_size() > 0) {
         blobs_.resize(layer_param_.blobs_size());
         for (int i = 0; i < layer_param_.blobs_size(); ++i) {
@@ -59,6 +66,7 @@ class Layer {
    */
   void SetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+    InitMutex();
     CheckBlobCounts(bottom, top);
     LayerSetUp(bottom, top);
     Reshape(bottom, top);
@@ -85,7 +93,31 @@ class Layer {
       const vector<Blob<Dtype>*>& top) {}
 
   /**
-   * @brief Adjust the shapes of top blobs and internal buffers to accomodate
+   * @brief Whether a layer should be shared by multiple nets during data
+   *        parallelism. By default, all layers except for data layers should
+   *        not be shared. data layers should be shared to ensure each worker
+   *        solver access data sequentially during data parallelism.
+   */
+  virtual inline bool ShareInParallel() const { return false; }
+
+  /** @brief Return whether this layer is actually shared by other nets.
+   *         If ShareInParallel() is true and using more than one GPU and the
+   *         net has TRAIN phase, then this function is expected return true.
+   */
+  inline bool IsShared() const { return is_shared_; }
+
+  /** @brief Set whether this layer is actually shared by other nets
+   *         If ShareInParallel() is true and using more than one GPU and the
+   *         net has TRAIN phase, then is_shared should be set true.
+   */
+  inline void SetShared(bool is_shared) {
+    CHECK(ShareInParallel() || !is_shared)
+        << type() << "Layer does not support sharing.";
+    is_shared_ = is_shared;
+  }
+
+  /**
+   * @brief Adjust the shapes of top blobs and internal buffers to accommodate
    *        the shapes of the bottom blobs.
    *
    * @param bottom the input blobs, with the requested input shapes
@@ -94,24 +126,10 @@ class Layer {
    * This method should reshape top blobs as needed according to the shapes
    * of the bottom (input) blobs, as well as reshaping any internal buffers
    * and making any other necessary adjustments so that the layer can
-   * accomodate the bottom blobs.
+   * accommodate the bottom blobs.
    */
   virtual void Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) = 0;
-
-  /**
-   * @brief Reset internal counters and start fresh, useful when the layer stores some state.
-   *
-   * Do nothing by default, override if a particular layer needs it.
-   */
-  virtual void ResetState() {}
-
-  /**
-   * @brief Reports the status of a layer that carries some state.
-   *
-   * Do nothing by default, override if a particular layer needs it.
-   */
-  virtual void ReportState() const {}
 
   /**
    * @brief Given the bottom blobs, compute the top blobs and the loss.
@@ -152,7 +170,7 @@ class Layer {
    * (Backward_cpu or Backward_gpu) to compute the bottom blob diffs given the
    * top blob diffs.
    *
-   * Your layer should implement Forward_cpu and (optionally) Forward_gpu.
+   * Your layer should implement Backward_cpu and (optionally) Backward_gpu.
    */
   inline void Backward(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down,
@@ -193,18 +211,9 @@ class Layer {
   }
 
   /**
-   * @brief Returns the layer type as an enum value.
+   * @brief Returns the layer type.
    */
-  virtual inline LayerParameter_LayerType type() const {
-    return LayerParameter_LayerType_NONE;
-  }
-
-  /**
-   * @brief Returns the layer type name.
-   */
-  virtual inline const string& type_name() const {
-    return LayerParameter_LayerType_Name(type());
-  }
+  virtual inline const char* type() const { return ""; }
 
   /**
    * @brief Returns the exact number of bottom blobs required by the layer,
@@ -311,6 +320,8 @@ class Layer {
  protected:
   /** The protobuf that stores the layer parameters */
   LayerParameter layer_param_;
+  /** The phase: TRAIN or TEST */
+  Phase phase_;
   /** The vector that stores the learnable parameters as a set of blobs. */
   vector<shared_ptr<Blob<Dtype> > > blobs_;
   /** Vector indicating whether to compute the diff of each param blob. */
@@ -361,37 +372,37 @@ class Layer {
                                const vector<Blob<Dtype>*>& top) {
     if (ExactNumBottomBlobs() >= 0) {
       CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
-          << type_name() << " Layer takes " << ExactNumBottomBlobs()
+          << type() << " Layer takes " << ExactNumBottomBlobs()
           << " bottom blob(s) as input.";
     }
     if (MinBottomBlobs() >= 0) {
       CHECK_LE(MinBottomBlobs(), bottom.size())
-          << type_name() << " Layer takes at least " << MinBottomBlobs()
+          << type() << " Layer takes at least " << MinBottomBlobs()
           << " bottom blob(s) as input.";
     }
     if (MaxBottomBlobs() >= 0) {
       CHECK_GE(MaxBottomBlobs(), bottom.size())
-          << type_name() << " Layer takes at most " << MaxBottomBlobs()
+          << type() << " Layer takes at most " << MaxBottomBlobs()
           << " bottom blob(s) as input.";
     }
     if (ExactNumTopBlobs() >= 0) {
       CHECK_EQ(ExactNumTopBlobs(), top.size())
-          << type_name() << " Layer produces " << ExactNumTopBlobs()
+          << type() << " Layer produces " << ExactNumTopBlobs()
           << " top blob(s) as output.";
     }
     if (MinTopBlobs() >= 0) {
       CHECK_LE(MinTopBlobs(), top.size())
-          << type_name() << " Layer produces at least " << MinTopBlobs()
+          << type() << " Layer produces at least " << MinTopBlobs()
           << " top blob(s) as output.";
     }
     if (MaxTopBlobs() >= 0) {
       CHECK_GE(MaxTopBlobs(), top.size())
-          << type_name() << " Layer produces at most " << MaxTopBlobs()
+          << type() << " Layer produces at most " << MaxTopBlobs()
           << " top blob(s) as output.";
     }
     if (EqualNumBottomTopBlobs()) {
       CHECK_EQ(bottom.size(), top.size())
-          << type_name() << " Layer produces one top blob as output for each "
+          << type() << " Layer produces one top blob as output for each "
           << "bottom blob input.";
     }
   }
@@ -416,6 +427,20 @@ class Layer {
     }
   }
 
+ private:
+  /** Whether this layer is actually shared by other nets*/
+  bool is_shared_;
+
+  /** The mutex for sequential forward if this layer is shared */
+  shared_ptr<boost::mutex> forward_mutex_;
+
+  /** Initialize forward_mutex_ */
+  void InitMutex();
+  /** Lock forward_mutex_ if this layer is shared */
+  void Lock();
+  /** Unlock forward_mutex_ if this layer is shared */
+  void Unlock();
+
   DISABLE_COPY_AND_ASSIGN(Layer);
 };  // class Layer
 
@@ -425,7 +450,10 @@ class Layer {
 template <typename Dtype>
 inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
+  // Lock during forward to ensure sequential forward
+  Lock();
   Dtype loss = 0;
+  Reshape(bottom, top);
   switch (Caffe::mode()) {
   case Caffe::CPU:
     Forward_cpu(bottom, top);
@@ -454,6 +482,7 @@ inline Dtype Layer<Dtype>::Forward(const vector<Blob<Dtype>*>& bottom,
   default:
     LOG(FATAL) << "Unknown caffe mode.";
   }
+  Unlock();
   return loss;
 }
 

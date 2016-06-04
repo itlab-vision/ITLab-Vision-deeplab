@@ -1,19 +1,16 @@
 // TanH neuron activation function layer.
 // Adapted from ReLU layer code written by Yangqing Jia
 
-#include <algorithm>
 #include <vector>
 
-#include "caffe/layer.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/tanh_layer.hpp"
 
 namespace caffe {
 
 template <typename Dtype>
 __global__ void TanHForward(const int n, const Dtype* in, Dtype* out) {
   CUDA_KERNEL_LOOP(index, n) {
-    Dtype exp2x = exp(2 * in[index]);
-    out[index] = (exp2x - Dtype(1)) / (exp2x + Dtype(1));
+    out[index] = tanh(in[index]);
   }
 }
 

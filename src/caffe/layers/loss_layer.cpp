@@ -1,12 +1,6 @@
-#include <algorithm>
-#include <cfloat>
-#include <cmath>
 #include <vector>
 
-#include "caffe/layer.hpp"
-#include "caffe/util/io.hpp"
-#include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/loss_layer.hpp"
 
 namespace caffe {
 
@@ -24,7 +18,8 @@ void LossLayer<Dtype>::Reshape(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   CHECK_EQ(bottom[0]->num(), bottom[1]->num())
       << "The data and label should have the same number.";
-  top[0]->Reshape(1, 1, 1, 1);
+  vector<int> loss_shape(0);  // Loss layers output a scalar; 0 axes.
+  top[0]->Reshape(loss_shape);
 }
 
 INSTANTIATE_CLASS(LossLayer);

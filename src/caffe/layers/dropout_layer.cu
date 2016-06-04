@@ -1,15 +1,9 @@
-#include <algorithm>
-#include <limits>
 #include <vector>
 
-#include "caffe/common.hpp"
-#include "caffe/layer.hpp"
-#include "caffe/syncedmem.hpp"
+#include "caffe/layers/dropout_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
-
 
 template <typename Dtype>
 __global__ void DropoutForward(const int n, const Dtype* in,
@@ -26,7 +20,7 @@ void DropoutLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
-  if (Caffe::phase() == Caffe::TRAIN) {
+  if (this->phase_ == TRAIN) {
     unsigned int* mask =
         static_cast<unsigned int*>(rand_vec_.mutable_gpu_data());
     caffe_gpu_rng_uniform(count, mask);
@@ -56,7 +50,7 @@ void DropoutLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   if (propagate_down[0]) {
     const Dtype* top_diff = top[0]->gpu_diff();
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
-    if (Caffe::phase() == Caffe::TRAIN) {
+    if (this->phase_ == TRAIN) {
       const unsigned int* mask =
           static_cast<const unsigned int*>(rand_vec_.gpu_data());
       const int count = bottom[0]->count();
@@ -72,6 +66,5 @@ void DropoutLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(DropoutLayer);
-
 
 }  // namespace caffe

@@ -1,10 +1,6 @@
 #ifndef CAFFE_DATA_TRANSFORMER_HPP
 #define CAFFE_DATA_TRANSFORMER_HPP
 
-#ifndef OSX
-#include <opencv2/core/core.hpp>
-#endif
-
 #include <vector>
 
 #include "caffe/blob.hpp"
@@ -20,7 +16,7 @@ namespace caffe {
 template <typename Dtype>
 class DataTransformer {
  public:
-  explicit DataTransformer(const TransformationParameter& param);
+  explicit DataTransformer(const TransformationParameter& param, Phase phase);
   virtual ~DataTransformer() {}
 
   /**
@@ -54,6 +50,20 @@ class DataTransformer {
   void Transform(const vector<Datum> & datum_vector,
                 Blob<Dtype>* transformed_blob);
 
+#ifdef USE_OPENCV
+  /**
+   * @brief Applies the transformation defined in the data layer's
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob's data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector<cv::Mat> & mat_vector,
+                Blob<Dtype>* transformed_blob);
+
   /**
    * @brief Applies the transformation defined in the data layer's
    * transform_param block to a cv::Mat
@@ -64,17 +74,29 @@ class DataTransformer {
    *    This is destination blob. It can be part of top blob's data if
    *    set_cpu_data() is used. See image_data_layer.cpp for an example.
    */
-#ifndef OSX
   void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
 
-  // jay add
+  /** Deeplab
+   * @brief Applies the transformation defined in the data layer's
+   * transform_param block to a vector<cv::Mat> with image and label 
+   * simultaneously.
+   *
+   * @param cv_img_seg
+   *    vector<cv::Mat> containing the data to be transformed.
+   * @param transformed_data_blob
+   *    This is image destination blob. It can be part of top blob's data if
+   *    set_cpu_data() is used. See image_seg_data_layer.cpp for an example.
+   * @param transformed_label_blob
+   *    This is destination label blob. It can be part of top blob's data if
+   *    set_cpu_data() is used. See image_seg_data_layer.cpp for an example.
+   * @param ignore_label
+   *    Label index that ignored in ground thruth. Used as empty space filler.
+   */
   void TransformImgAndSeg(const std::vector<cv::Mat>& cv_img_seg,
-    Blob<Dtype>* transformed_data_blob, Blob<Dtype>* transformed_label_blob,
-    const int ignore_label);
-  //void TransformSegAndPad(const cv::Mat& cv_seg, Blob<Dtype>* transformed_blob);
-  //void TransformAndPad(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
-  // end jay
-#endif
+                         Blob<Dtype>* transformed_data_blob, 
+                         Blob<Dtype>* transformed_label_blob,
+                         const int ignore_label);
+#endif  // USE_OPENCV
 
   /**
    * @brief Applies the same transformation defined in the data layer's
@@ -89,10 +111,47 @@ class DataTransformer {
    */
   void Transform(Blob<Dtype>* input_blob, Blob<Dtype>* transformed_blob);
 
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   */
+  vector<int> InferBlobShape(const Datum& datum);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   */
+  vector<int> InferBlobShape(const vector<Datum> & datum_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   */
+#ifdef USE_OPENCV
+  vector<int> InferBlobShape(const vector<cv::Mat> & mat_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   */
+  vector<int> InferBlobShape(const cv::Mat& cv_img);
+#endif  // USE_OPENCV
+
  protected:
    /**
    * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
-   * 
+   *
    * @param n
    *    The upperbound (exclusive) value of the random number.
    * @return
@@ -106,7 +165,7 @@ class DataTransformer {
 
 
   shared_ptr<Caffe::RNG> rng_;
-  Caffe::Phase phase_;
+  Phase phase_;
   Blob<Dtype> data_mean_;
   vector<Dtype> mean_values_;
 };
@@ -114,4 +173,3 @@ class DataTransformer {
 }  // namespace caffe
 
 #endif  // CAFFE_DATA_TRANSFORMER_HPP_
-

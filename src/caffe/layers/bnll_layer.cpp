@@ -1,8 +1,7 @@
 #include <algorithm>
 #include <vector>
 
-#include "caffe/layer.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/bnll_layer.hpp"
 
 namespace caffe {
 
@@ -43,5 +42,6 @@ STUB_GPU(BNLLLayer);
 #endif
 
 INSTANTIATE_CLASS(BNLLLayer);
-REGISTER_LAYER_CLASS(BNLL, BNLLLayer);
+REGISTER_LAYER_CLASS(BNLL);
+
 }  // namespace caffe

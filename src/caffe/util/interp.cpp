@@ -1,9 +1,9 @@
 // Copyright 2014 George Papandreou
+#include <algorithm>
+#include <cmath>
 
 #include "caffe/common.hpp"
 #include "caffe/util/interp.hpp"
-#include <algorithm>
-#include <cmath>
 
 namespace caffe {
 

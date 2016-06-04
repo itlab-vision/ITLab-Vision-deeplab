@@ -54,28 +54,6 @@ void caffe_axpy<double>(const int N, const double alpha, const double* X,
     double* Y) { cblas_daxpy(N, alpha, X, 1, Y, 1); }
 
 template <typename Dtype>
-void caffe_cpu_dot_mul(const CBLAS_TRANSPOSE TransAB,
-   const CBLAS_TRANSPOSE TransC,
-   const int M, const int N, const int K,
-   const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype *C,
-   Dtype *buf,
-   const Dtype beta, Dtype *D) {
-  caffe_mul(M * K, A, B, buf);
-  caffe_cpu_gemm(TransAB, TransC,
-    M, N, K,
-    alpha, buf, C,
-    beta, D);
-}
-
-template <typename Dtype>
-void caffe_cpu_div_safe(const int n, const Dtype* a, const Dtype* b,
-    Dtype* y) {
-  for (int i = 0; i < n; ++i) {
-    y[i] = (b[i] != 0) ? a[i] / b[i] : a[i];
-  }
-}
-
-template <typename Dtype>
 void caffe_set(const int N, const Dtype alpha, Dtype* Y) {
   if (alpha == 0) {
     memset(Y, 0, sizeof(Dtype) * N);  // NOLINT(caffe/alt_fn)
@@ -146,88 +124,6 @@ template <>
 void caffe_cpu_axpby<double>(const int N, const double alpha, const double* X,
                              const double beta, double* Y) {
   cblas_daxpby(N, alpha, X, 1, beta, Y, 1);
-}
-
-// C := A*diag(x). if mode = CUBLAS_SIDE_RIGHT
-// C := diag(x)*A. if mode = CUBLAS_SIDE_LEFT
-// A, C have size M x N
-template <typename Dtype>
-void caffe_cpu_dgmm(cublasSideMode_t mode, 
-		    const int M, const int N, const Dtype *A, const Dtype *x, Dtype *C) {
-  memcpy(C, A, M * N * sizeof(Dtype));
-  caffe_cpu_dgmm(mode, M, N, C, x);
-}
-
-template <>
-void caffe_cpu_dgmm<float>(cublasSideMode_t mode, 
-			   const int M, const int N, float *A, const float *x) {
-  if (mode == CUBLAS_SIDE_LEFT) {
-    for (int m = 0; m < M; ++m)
-	cblas_sscal(N, x[m], A + m * N, 1);
-  }
-  else {
-    for (int n = 0; n < N; ++n)
-	cblas_sscal(M, x[n], A + n, N);
-  }
-}
-
-template <>
-void caffe_cpu_dgmm<double>(cublasSideMode_t mode, 
-			    const int M, const int N, double *A, const double *x) {
-  if (mode == CUBLAS_SIDE_LEFT) {
-    for (int m = 0; m < M; ++m)
-	cblas_dscal(N, x[m], A + m * N, 1);
-  }
-  else {
-    for (int n = 0; n < N; ++n)
-	cblas_dscal(M, x[n], A + n, N);
-  }
-}
-
-template <>
-void caffe_gpu_dgmm<float>(cublasSideMode_t mode, 
-			   const int M, const int N, const float *A, const float *x, float *C) {
-  // Note that cublas follows fortran order.
-  mode = (mode == CUBLAS_SIDE_RIGHT) ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-  CUBLAS_CHECK(cublasSdgmm(Caffe::cublas_handle(), mode,
-			   N, M,
-			   A, N,
-			   x, 1,
-			   C, N));
-}
-template <>
-void caffe_gpu_dgmm<float>(cublasSideMode_t mode, 
-			     const int M, const int N, float *A, const float *x) {
-  // Note that cublas follows fortran order.
-  mode = (mode == CUBLAS_SIDE_RIGHT) ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-  CUBLAS_CHECK(cublasSdgmm(Caffe::cublas_handle(), mode,
-			   N, M,
-			   A, N,
-			   x, 1,
-			   A, N));
-}
-
-template <>
-void caffe_gpu_dgmm<double>(cublasSideMode_t mode, 
-			    const int M, const int N, const double *A, const double *x, double *C) {
-  // Note that cublas follows fortran order.
-  mode = (mode == CUBLAS_SIDE_RIGHT) ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-  CUBLAS_CHECK(cublasDdgmm(Caffe::cublas_handle(), mode,
-			   N, M,
-			   A, N,
-			   x, 1,
-			   C, N));
-}
-template <>
-void caffe_gpu_dgmm<double>(cublasSideMode_t mode, 
-			    const int M, const int N, double *A, const double *x) {
-  // Note that cublas follows fortran order.
-  mode = (mode == CUBLAS_SIDE_RIGHT) ? CUBLAS_SIDE_LEFT : CUBLAS_SIDE_RIGHT;
-  CUBLAS_CHECK(cublasDdgmm(Caffe::cublas_handle(), mode,
-			   N, M,
-			   A, N,
-			   x, 1,
-			   A, N));
 }
 
 template <>
@@ -308,6 +204,16 @@ void caffe_exp<float>(const int n, const float* a, float* y) {
 template <>
 void caffe_exp<double>(const int n, const double* a, double* y) {
   vdExp(n, a, y);
+}
+
+template <>
+void caffe_log<float>(const int n, const float* a, float* y) {
+  vsLn(n, a, y);
+}
+
+template <>
+void caffe_log<double>(const int n, const double* a, double* y) {
+  vdLn(n, a, y);
 }
 
 template <>
@@ -443,28 +349,6 @@ template
 double caffe_cpu_dot<double>(const int n, const double* x, const double* y);
 
 template <>
-int caffe_cpu_hamming_distance<float>(const int n, const float* x,
-                                  const float* y) {
-  int dist = 0;
-  for (int i = 0; i < n; ++i) {
-    dist += __builtin_popcount(static_cast<uint32_t>(x[i]) ^
-                               static_cast<uint32_t>(y[i]));
-  }
-  return dist;
-}
-
-template <>
-int caffe_cpu_hamming_distance<double>(const int n, const double* x,
-                                   const double* y) {
-  int dist = 0;
-  for (int i = 0; i < n; ++i) {
-    dist += __builtin_popcountl(static_cast<uint64_t>(x[i]) ^
-                                static_cast<uint64_t>(y[i]));
-  }
-  return dist;
-}
-
-template <>
 float caffe_cpu_asum<float>(const int n, const float* x) {
   return cblas_sasum(n, x, 1);
 }
@@ -477,34 +361,15 @@ double caffe_cpu_asum<double>(const int n, const double* x) {
 template <>
 void caffe_cpu_scale<float>(const int n, const float alpha, const float *x,
                             float* y) {
-  if (x != y) {
-    cblas_scopy(n, x, 1, y, 1);
-  }
+  cblas_scopy(n, x, 1, y, 1);
   cblas_sscal(n, alpha, y, 1);
 }
 
 template <>
 void caffe_cpu_scale<double>(const int n, const double alpha, const double *x,
                              double* y) {
-  if (x != y) {
-    cblas_dcopy(n, x, 1, y, 1);
-  }
+  cblas_dcopy(n, x, 1, y, 1);
   cblas_dscal(n, alpha, y, 1);
 }
-
-
-// Explicit instances
-template void caffe_cpu_dgmm<float>(cublasSideMode_t, const int, const int, const float*, const float*, float*);
-template void caffe_cpu_dgmm<double>(cublasSideMode_t, const int, const int, const double*, const double*, double*);
-
-template void caffe_cpu_dot_mul<float>(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE,
-   const int, const int, const int, const float, const float*, const float*,
-   const float*, float*, const float, float *);
-template void caffe_cpu_dot_mul<double>(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE,
-   const int, const int, const int, const double, const double*, const double*,
-   const double*, double*, const double, double *);
-
-template void caffe_cpu_div_safe<float>(const int, const float*, const float*, float* y);
-template void caffe_cpu_div_safe<double>(const int, const double*, const double*, double* y);
 
 }  // namespace caffe

@@ -2,11 +2,8 @@
 #include <cfloat>
 #include <vector>
 
-#include "caffe/common.hpp"
-#include "caffe/layer.hpp"
-#include "caffe/syncedmem.hpp"
+#include "caffe/layers/pooling_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
 
@@ -81,6 +78,8 @@ void PoolingLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
 template <typename Dtype>
 void PoolingLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
+  CHECK_EQ(4, bottom[0]->num_axes()) << "Input must have 4 axes, "
+      << "corresponding to (num, channels, height, width)";
   channels_ = bottom[0]->channels();
   height_ = bottom[0]->height();
   width_ = bottom[0]->width();
@@ -313,6 +312,5 @@ STUB_GPU(PoolingLayer);
 #endif
 
 INSTANTIATE_CLASS(PoolingLayer);
-
 
 }  // namespace caffe

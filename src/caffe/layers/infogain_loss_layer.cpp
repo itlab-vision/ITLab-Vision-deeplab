@@ -1,12 +1,9 @@
 #include <algorithm>
-#include <cfloat>
 #include <cmath>
 #include <vector>
 
-#include "caffe/layer.hpp"
+#include "caffe/layers/infogain_loss_layer.hpp"
 #include "caffe/util/io.hpp"
-#include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
 
@@ -75,11 +72,11 @@ void InfogainLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
   if (propagate_down[1]) {
-    LOG(FATAL) << this->type_name()
+    LOG(FATAL) << this->type()
                << " Layer cannot backpropagate to label inputs.";
   }
   if (propagate_down.size() > 2 && propagate_down[2]) {
-    LOG(FATAL) << this->type_name()
+    LOG(FATAL) << this->type()
                << " Layer cannot backpropagate to infogain inputs.";
   }
   if (propagate_down[0]) {
@@ -106,5 +103,5 @@ void InfogainLossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
 }
 
 INSTANTIATE_CLASS(InfogainLossLayer);
-REGISTER_LAYER_CLASS(INFOGAIN_LOSS, InfogainLossLayer);
+REGISTER_LAYER_CLASS(InfogainLoss);
 }  // namespace caffe

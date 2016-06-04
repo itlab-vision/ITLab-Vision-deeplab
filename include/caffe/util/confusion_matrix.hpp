@@ -16,11 +16,13 @@
  ****************************************************************************
 */ 
 
-#ifndef _CONFUSION_MATRIX_H
-#define _CONFUSION_MATRIX_H
+#ifndef CAFFE_UTIL_CONFUSION_MATRIX_HPP_
+#define CAFFE_UTIL_CONFUSION_MATRIX_HPP_
 
-#include <vector>
 #include <string>
+#include <vector>
+
+namespace caffe {
 
 class ConfusionMatrix {
  public:
@@ -73,5 +75,7 @@ class ConfusionMatrix {
 
 };
 
+}  // namespace caffe
 
-#endif
+#endif  // CAFFE_UTIL_CONFUSION_MATRIX_HPP_
+

@@ -1,16 +1,16 @@
+#include <sstream>
 #include <vector>
 
 #include "caffe/common.hpp"
 #include "caffe/layer.hpp"
-#include "caffe/vision_layers.hpp"
+#include "caffe/layers/mat_write_layer.hpp"
 #include "caffe/syncedmem.hpp"
-#include <sstream>
 
 namespace caffe {
 
 template <typename Dtype>
 void MatWriteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
-				      const vector<Blob<Dtype>*>& top) {
+                      const vector<Blob<Dtype>*>& top) {
   iter_ = 0;
   prefix_ = this->layer_param_.mat_write_param().prefix();
   period_ = this->layer_param_.mat_write_param().period();
@@ -18,7 +18,7 @@ void MatWriteLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   if (this->layer_param_.mat_write_param().has_source()) {
     std::ifstream infile(this->layer_param_.mat_write_param().source().c_str());
     CHECK(infile.good()) << "Failed to open source file "
-			 << this->layer_param_.mat_write_param().source();
+             << this->layer_param_.mat_write_param().source();
     const int strip = this->layer_param_.mat_write_param().strip();
     CHECK_GE(strip, 0) << "Strip cannot be negative";
     string linestr;
@@ -46,11 +46,11 @@ void MatWriteLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       std::ostringstream oss;
       oss << prefix_;
       if (this->layer_param_.mat_write_param().has_source()) {
-	CHECK_LT(iter_, fnames_.size()) << "Test has run for more iterations than it was supposed to";
-	oss << fnames_[iter_];
+        CHECK_LT(iter_, fnames_.size()) << "Test has run for more iterations than it was supposed to";
+        oss << fnames_[iter_];
       }
       else {
-	oss << "iter_" << iter_;
+        oss << "iter_" << iter_;
       }
       oss << "_blob_" << i << ".mat";
       bottom[i]->ToMat(oss.str().c_str(), false);
@@ -63,11 +63,10 @@ template <typename Dtype>
 void MatWriteLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
-  return;
 }
 
 
 INSTANTIATE_CLASS(MatWriteLayer);
-REGISTER_LAYER_CLASS(MAT_WRITE, MatWriteLayer);
+REGISTER_LAYER_CLASS(MatWrite);
 
 }  // namespace caffe

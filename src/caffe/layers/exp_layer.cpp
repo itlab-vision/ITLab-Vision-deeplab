@@ -1,9 +1,7 @@
-#include <algorithm>
 #include <vector>
 
-#include "caffe/layer.hpp"
+#include "caffe/layers/exp_layer.hpp"
 #include "caffe/util/math_functions.hpp"
-#include "caffe/vision_layers.hpp"
 
 namespace caffe {
 
@@ -25,7 +23,8 @@ void ExpLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
   const Dtype input_scale = this->layer_param_.exp_param().scale();
   const Dtype input_shift = this->layer_param_.exp_param().shift();
   inner_scale_ = log_base * input_scale;
-  outer_scale_ = (input_shift == Dtype(0)) ? Dtype(1) : pow(base, input_shift);
+  outer_scale_ = (input_shift == Dtype(0)) ? Dtype(1) :
+     ( (base != Dtype(-1)) ? pow(base, input_shift) : exp(input_shift) );
 }
 
 template <typename Dtype>
@@ -64,5 +63,6 @@ STUB_GPU(ExpLayer);
 #endif
 
 INSTANTIATE_CLASS(ExpLayer);
-REGISTER_LAYER_CLASS(EXP, ExpLayer);
+REGISTER_LAYER_CLASS(Exp);
+
 }  // namespace caffe

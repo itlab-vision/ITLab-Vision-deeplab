@@ -4,8 +4,6 @@
 #include <thrust/reduce.h>
 
 #include <cmath>
-#include <cstdlib>
-#include <cstring>
 
 #include "caffe/common.hpp"
 #include "caffe/util/math_functions.hpp"
@@ -76,20 +74,6 @@ void caffe_gpu_axpy<double>(const int N, const double alpha, const double* X,
   CUBLAS_CHECK(cublasDaxpy(Caffe::cublas_handle(), N, &alpha, X, 1, Y, 1));
 }
 
-template <typename Dtype>
-void caffe_gpu_dot_mul(const CBLAS_TRANSPOSE TransAB,
-   const CBLAS_TRANSPOSE TransC,
-   const int M, const int N, const int K,
-   const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype *C,
-   Dtype *buf,
-   const Dtype beta, Dtype *D) {
-  caffe_gpu_mul(M * K, A, B, buf);
-  caffe_gpu_gemm(TransAB, TransC,
-    M, N, K,
-    alpha, buf, C,
-    beta, D);
-}
-
 void caffe_gpu_memcpy(const size_t N, const void* X, void* Y) {
   if (X != Y) {
     CUDA_CHECK(cudaMemcpy(Y, X, N, cudaMemcpyDefault));  // NOLINT(caffe/alt_fn)
@@ -145,18 +129,14 @@ void caffe_gpu_asum<double>(const int n, const double* x, double* y) {
 template <>
 void caffe_gpu_scale<float>(const int n, const float alpha, const float *x,
                             float* y) {
-  if (x != y) {			    
-    CUBLAS_CHECK(cublasScopy(Caffe::cublas_handle(), n, x, 1, y, 1));
-  }
+  CUBLAS_CHECK(cublasScopy(Caffe::cublas_handle(), n, x, 1, y, 1));
   CUBLAS_CHECK(cublasSscal(Caffe::cublas_handle(), n, &alpha, y, 1));
 }
 
 template <>
 void caffe_gpu_scale<double>(const int n, const double alpha, const double *x,
                              double* y) {
-  if (x != y) {
-    CUBLAS_CHECK(cublasDcopy(Caffe::cublas_handle(), n, x, 1, y, 1));
-  }
+  CUBLAS_CHECK(cublasDcopy(Caffe::cublas_handle(), n, x, 1, y, 1));
   CUBLAS_CHECK(cublasDscal(Caffe::cublas_handle(), n, &alpha, y, 1));
 }
 
@@ -300,28 +280,6 @@ void caffe_gpu_div<double>(const int N, const double* a,
 }
 
 template <typename Dtype>
-__global__ void div_safe_kernel(const int n, const Dtype* a,
-    const Dtype* b, Dtype* y) {
-  CUDA_KERNEL_LOOP(index, n) {
-    y[index] = (b[index] != 0) ? a[index] / b[index] : a[index];
-  }
-}
-
-template <>
-void caffe_gpu_div_safe<float>(const int N, const float* a,
-    const float* b, float* y) {
-  div_safe_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
-      N, a, b, y);
-}
-
-template <>
-void caffe_gpu_div_safe<double>(const int N, const double* a,
-    const double* b, double* y) {
-  div_safe_kernel<double><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
-      N, a, b, y);
-}
-
-template <typename Dtype>
 __global__ void abs_kernel(const int n, const Dtype* a, Dtype* y) {
   CUDA_KERNEL_LOOP(index, n) {
     y[index] = abs(a[index]);
@@ -365,6 +323,27 @@ void caffe_gpu_exp<double>(const int N, const double* a, double* y) {
 }
 
 template <typename Dtype>
+__global__ void log_kernel(const int n, const Dtype* a, Dtype* y) {
+  CUDA_KERNEL_LOOP(index, n) {
+    y[index] = log(a[index]);
+  }
+}
+
+template <>
+void caffe_gpu_log<float>(const int N, const float* a, float* y) {
+  // NOLINT_NEXT_LINE(whitespace/operators)
+  log_kernel<float><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+      N, a, y);
+}
+
+template <>
+void caffe_gpu_log<double>(const int N, const double* a, double* y) {
+  // NOLINT_NEXT_LINE(whitespace/operators)
+  log_kernel<double><<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+      N, a, y);
+}
+
+template <typename Dtype>
 __global__ void powx_kernel(const int n, const Dtype* a,
     const Dtype alpha, Dtype* y) {
   CUDA_KERNEL_LOOP(index, n) {
@@ -391,51 +370,6 @@ void caffe_gpu_powx<double>(const int N, const double* a,
 DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sign, y[index] = (Dtype(0) < x[index])
                                       - (x[index] < Dtype(0)));
 DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(sgnbit, y[index] = signbit(x[index]));
-
-__global__ void popc_kernel(const int n, const float* a,
-    const float* b, uint8_t* y) {
-  CUDA_KERNEL_LOOP(index, n) {
-    y[index] = __popc(static_cast<uint32_t>(a[index]) ^
-                      static_cast<uint32_t>(b[index]));
-  }
-}
-
-__global__ void popcll_kernel(const int n, const double* a,
-    const double* b, uint8_t* y) {
-  CUDA_KERNEL_LOOP(index, n) {
-    y[index] = __popcll(static_cast<uint64_t>(a[index]) ^
-                      static_cast<uint64_t>(b[index]));
-  }
-}
-
-template <>
-uint32_t caffe_gpu_hamming_distance<float>(const int n, const float* x,
-                                  const float* y) {
-  // TODO: Fix caffe_gpu_hamming_distance (see failing unit test
-  // TestHammingDistanceGPU in test_math_functions.cpp).
-  NOT_IMPLEMENTED;
-  thrust::device_vector<uint8_t> popcounts(n);
-  // NOLINT_NEXT_LINE(whitespace/operators)
-  popc_kernel<<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>(
-      n, x, y, thrust::raw_pointer_cast(popcounts.data()));
-  return thrust::reduce(popcounts.begin(), popcounts.end(),
-                        (uint32_t) 0, thrust::plus<uint32_t>());
-}
-
-template <>
-uint32_t caffe_gpu_hamming_distance<double>(const int n, const double* x,
-                                   const double* y) {
-  // TODO: Fix caffe_gpu_hamming_distance (see failing unit test
-  // TestHammingDistanceGPU in test_math_functions.cpp).
-  NOT_IMPLEMENTED;
-  thrust::device_vector<uint8_t> popcounts(n);
-  // NOLINT_NEXT_LINE(whitespace/operators)
-  popcll_kernel<<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>(
-      n, x, y, thrust::raw_pointer_cast(popcounts.data()));
-  return thrust::reduce(popcounts.begin(), popcounts.end(),
-                        /* NOLINT_NEXT_LINE(build/include_what_you_use) */
-                        (uint32_t) 0, thrust::plus<uint32_t>());
-}
 
 void caffe_gpu_rng_uniform(const int n, unsigned int* r) {
   CURAND_CHECK(curandGenerate(Caffe::curand_generator(), r, n));
@@ -480,13 +414,5 @@ void caffe_gpu_rng_gaussian(const int n, const double mu, const double sigma,
   CURAND_CHECK(
       curandGenerateNormalDouble(Caffe::curand_generator(), r, n, mu, sigma));
 }
-
-// Explicit instances
-template void caffe_gpu_dot_mul<float>(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE,
-   const int, const int, const int, const float, const float*, const float*,
-   const float*, float*, const float, float *);
-template void caffe_gpu_dot_mul<double>(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE,
-   const int, const int, const int, const double, const double*, const double*,
-   const double*, double*, const double, double *);
 
 }  // namespace caffe

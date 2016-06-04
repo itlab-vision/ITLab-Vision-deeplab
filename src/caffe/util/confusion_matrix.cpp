@@ -4,6 +4,8 @@
 #include "caffe/common.hpp"
 #include "caffe/util/confusion_matrix.hpp"
 
+namespace caffe {
+
 std::string ConfusionMatrix::COL_SEP("\t");
 std::string ConfusionMatrix::ROW_BEGIN("\t");
 std::string ConfusionMatrix::ROW_END("");
@@ -20,13 +22,13 @@ ConfusionMatrix::ConfusionMatrix(const int m) {
 ConfusionMatrix::~ConfusionMatrix() {}
 
 int ConfusionMatrix::numRows() const { 
-  return (int) _matrix.size();
+  return _matrix.size();
 }
 
 int ConfusionMatrix::numCols() const {
   if(_matrix.empty())
     return 0;
-  return (int) _matrix[0].size();
+  return _matrix[0].size();
 }
 
 void ConfusionMatrix::resize(const int m) {
@@ -341,3 +343,5 @@ const unsigned long& ConfusionMatrix::operator()(int i, int j) const {
 unsigned long& ConfusionMatrix::operator()(int i, int j) {
   return _matrix[i][j];
 }
+
+}  // namespace caffe

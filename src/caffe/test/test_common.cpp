@@ -1,5 +1,3 @@
-#include <cstring>
-
 #include "gtest/gtest.h"
 
 #include "caffe/common.hpp"
@@ -27,13 +25,6 @@ TEST_F(CommonTest, TestBrewMode) {
   EXPECT_EQ(Caffe::mode(), Caffe::CPU);
   Caffe::set_mode(Caffe::GPU);
   EXPECT_EQ(Caffe::mode(), Caffe::GPU);
-}
-
-TEST_F(CommonTest, TestPhase) {
-  Caffe::set_phase(Caffe::TRAIN);
-  EXPECT_EQ(Caffe::phase(), Caffe::TRAIN);
-  Caffe::set_phase(Caffe::TEST);
-  EXPECT_EQ(Caffe::phase(), Caffe::TEST);
 }
 
 TEST_F(CommonTest, TestRandSeedCPU) {
