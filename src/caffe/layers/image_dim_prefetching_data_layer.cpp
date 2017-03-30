@@ -13,7 +13,7 @@ namespace caffe {
 
 template <typename Dtype>
 ImageDimPrefetchingDataLayer<Dtype>::ImageDimPrefetchingDataLayer(
-    const LayerParameter& param) 
+    const LayerParameter& param)
     : BaseDataLayer<Dtype>(param),
       prefetch_free_(), prefetch_full_() {
 }
@@ -105,7 +105,7 @@ template <typename Dtype>
 void ImageDimPrefetchingDataLayer<Dtype>::Forward_cpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   SegmentationBatch<Dtype>* batch = prefetch_full_.pop(
-      "Data layer prefetch queue empty");  
+      "Data layer prefetch queue empty");
 
   caffe_copy(batch->data_.count(), batch->data_.cpu_data(),
       top[0]->mutable_cpu_data());
@@ -117,7 +117,7 @@ void ImageDimPrefetchingDataLayer<Dtype>::Forward_cpu(
     caffe_copy(batch->dim_.count(), batch->dim_.cpu_data(),
         top[2]->mutable_cpu_data());
   }
-  
+
   prefetch_free_.push(batch);
 }
 

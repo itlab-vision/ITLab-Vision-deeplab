@@ -86,7 +86,9 @@ const int CAFFE_CUDA_NUM_THREADS = 512;
 
 // CUDA: number of blocks for threads.
 inline int CAFFE_GET_BLOCKS(const int N) {
-  return (N + CAFFE_CUDA_NUM_THREADS - 1) / CAFFE_CUDA_NUM_THREADS;
+  const int num_blocks = (N + CAFFE_CUDA_NUM_THREADS - 1) / CAFFE_CUDA_NUM_THREADS;
+  const int max_blocks = 65535;
+  return num_blocks < max_blocks ? num_blocks : max_blocks;
 }
 
 }  // namespace caffe

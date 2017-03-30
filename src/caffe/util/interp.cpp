@@ -63,7 +63,7 @@ void caffe_cpu_interp2(const int channels,
 	Dtype* pos2 = &data2[channels * ((y2 + h2) * Width2 + (x2 + w2))];
 	for (int c = 0; c < channels; ++c) {
 	  pos2[0] =
-	    h0lambda * (w0lambda * pos1[0]            + w1lambda * pos1[channels * w1p]) + 
+	    h0lambda * (w0lambda * pos1[0]            + w1lambda * pos1[channels * w1p]) +
 	    h1lambda * (w0lambda * pos1[channels * h1p * Width1] + w1lambda * pos1[channels * (h1p * Width1 + w1p)]);
 	  pos1++;
 	  pos2++;
@@ -74,7 +74,7 @@ void caffe_cpu_interp2(const int channels,
 	Dtype* pos2 = &data2[(y2 + h2) * Width2 + (x2 + w2)];
 	for (int c = 0; c < channels; ++c) {
 	  pos2[0] =
-	    h0lambda * (w0lambda * pos1[0]            + w1lambda * pos1[w1p]) + 
+	    h0lambda * (w0lambda * pos1[0]            + w1lambda * pos1[w1p]) +
 	    h1lambda * (w0lambda * pos1[h1p * Width1] + w1lambda * pos1[h1p * Width1 + w1p]);
 	  pos1 += Width1 * Height1;
 	  pos2 += Width2 * Height2;
@@ -188,7 +188,7 @@ void caffe_cpu_pyramid2(const int channels,
 	  Dtype* pos2 = &data2[channels * (h2 * width2 + w2)];
 	  for (int c = 0; c < channels; ++c) {
 	    pos2[0] =  static_cast<Dtype>(.25) *
-	      (pos1[0]                 + pos1[channels] + 
+	      (pos1[0]                 + pos1[channels] +
 	       pos1[channels * width1] + pos1[channels * (width1 + 1)]);
 	    pos1++;
 	    pos2++;
@@ -199,7 +199,7 @@ void caffe_cpu_pyramid2(const int channels,
 	  Dtype* pos2 = &data2[h2 * width2 + w2];
 	  for (int c = 0; c < channels; ++c) {
 	    pos2[0] =  static_cast<Dtype>(.25) *
-	      (pos1[0]      + pos1[1] + 
+	      (pos1[0]      + pos1[1] +
 	       pos1[width1] + pos1[width1 + 1]);
 	    pos1 += width1 * height1;
 	    pos2 += width2 * height2;
@@ -243,7 +243,7 @@ void caffe_cpu_mosaic(const int channels,
       }
       caffe_cpu_interp2<Dtype,packed>(channels,
 	  data_pyr_l, rect1.x() / factor, rect1.y() / factor, rect1.height() / factor, rect1.width() / factor, mosaic_params1.height() / factor, mosaic_params1.width() / factor,
-	  data2, rect2.x(), rect2.y(), rect2.height(), rect2.width(), mosaic_params2.height(), mosaic_params2.width());      
+	  data2, rect2.x(), rect2.y(), rect2.height(), rect2.width(), mosaic_params2.height(), mosaic_params2.width());
     }
   }
 }
@@ -276,7 +276,7 @@ void caffe_gpu_mosaic(const int channels,
       }
       caffe_gpu_interp2<Dtype,packed>(channels,
 	  data_pyr_l, rect1.x() / factor, rect1.y() / factor, rect1.height() / factor, rect1.width() / factor, mosaic_params1.height() / factor, mosaic_params1.width() / factor,
-	  data2, rect2.x(), rect2.y(), rect2.height(), rect2.width(), mosaic_params2.height(), mosaic_params2.width());      
+	  data2, rect2.x(), rect2.y(), rect2.height(), rect2.width(), mosaic_params2.height(), mosaic_params2.width());
     }
   }
 }

@@ -26,12 +26,12 @@ struct SegmentationBatch {
  * TODO(dox): thorough documentation for Forward and proto params.
  */
 template <typename Dtype>
-class ImageDimPrefetchingDataLayer : 
+class ImageDimPrefetchingDataLayer :
     public BaseDataLayer<Dtype>, public InternalThread  {
  public:
   explicit ImageDimPrefetchingDataLayer(const LayerParameter& param);
   virtual ~ImageDimPrefetchingDataLayer() {}
-  
+
   void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 

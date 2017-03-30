@@ -70,7 +70,7 @@ void WriteProtoToBinaryFile(const Message& proto, const char* filename) {
 }
 
 #ifdef USE_OPENCV
-void ReadImageToCVMat(const string& filename, const int height, 
+void ReadImageToCVMat(const string& filename, const int height,
     const int width, const bool is_color, cv::Mat* storage) {
   CHECK(storage);
 

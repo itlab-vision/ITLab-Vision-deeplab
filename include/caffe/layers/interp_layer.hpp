@@ -11,7 +11,7 @@ namespace caffe {
 
 /** Deeplab
  * @brief Changes the spatial resolution by bi-linear interpolation.
- * The target size is specified in terms of pixels. 
+ * The target size is specified in terms of pixels.
  * The start and end pixels of the input are mapped to the start
  * and end pixels of the output.
  */
@@ -38,7 +38,7 @@ class InterpLayer : public Layer<Dtype> {
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-  
+
   int num_, channels_;
   int height_in_, width_in_;
   int height_out_, width_out_;

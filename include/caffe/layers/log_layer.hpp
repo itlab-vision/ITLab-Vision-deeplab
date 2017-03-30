@@ -1,5 +1,5 @@
-#ifndef CAFFE_ELU_LAYER_HPP_
-#define CAFFE_ELU_LAYER_HPP_
+#ifndef CAFFE_LOG_LAYER_HPP_
+#define CAFFE_LOG_LAYER_HPP_
 
 #include <vector>
 
@@ -12,27 +12,27 @@
 namespace caffe {
 
 /**
- * @brief Exponential Linear Unit non-linearity @f$
- *        y = \left\{
- *        \begin{array}{lr}
- *            x                  & \mathrm{if} \; x > 0 \\
- *            \alpha (\exp(x)-1) & \mathrm{if} \; x \le 0
- *        \end{array} \right.
- *      @f$.
+ * @brief Computes @f$ y = log_{\gamma}(\alpha x + \beta) @f$,
+ *        as specified by the scale @f$ \alpha @f$, shift @f$ \beta @f$,
+ *        and base @f$ \gamma @f$.
  */
 template <typename Dtype>
-class ELULayer : public NeuronLayer<Dtype> {
+class LogLayer : public NeuronLayer<Dtype> {
  public:
   /**
-   * @param param provides ELUParameter elu_param,
-   *     with ELULayer options:
-   *   - alpha (\b optional, default 1).
-   *     the value @f$ \alpha @f$ by which controls saturation for negative inputs.
+   * @param param provides LogParameter log_param,
+   *     with LogLayer options:
+   *   - scale (\b optional, default 1) the scale @f$ \alpha @f$
+   *   - shift (\b optional, default 0) the shift @f$ \beta @f$
+   *   - base (\b optional, default -1 for a value of @f$ e \approx 2.718 @f$)
+   *         the base @f$ \gamma @f$
    */
-  explicit ELULayer(const LayerParameter& param)
+  explicit LogLayer(const LayerParameter& param)
       : NeuronLayer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      const vector<Blob<Dtype>*>& top);
 
-  virtual inline const char* type() const { return "ELU"; }
+  virtual inline const char* type() const { return "Log"; }
 
  protected:
   /**
@@ -42,12 +42,8 @@ class ELULayer : public NeuronLayer<Dtype> {
    * @param top output Blob vector (length 1)
    *   -# @f$ (N \times C \times H \times W) @f$
    *      the computed outputs @f$
-   *        y = \left\{
-   *        \begin{array}{lr}
-   *            x                  & \mathrm{if} \; x > 0 \\
-   *            \alpha (\exp(x)-1) & \mathrm{if} \; x \le 0
-   *        \end{array} \right.
-   *      @f$.
+   *        y = log_{\gamma}(\alpha x + \beta)
+   *      @f$
    */
   virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
@@ -55,7 +51,7 @@ class ELULayer : public NeuronLayer<Dtype> {
       const vector<Blob<Dtype>*>& top);
 
   /**
-   * @brief Computes the error gradient w.r.t. the ELU inputs.
+   * @brief Computes the error gradient w.r.t. the exp inputs.
    *
    * @param top output Blob vector (length 1), providing the error gradient with
    *      respect to the outputs
@@ -67,20 +63,20 @@ class ELULayer : public NeuronLayer<Dtype> {
    *   -# @f$ (N \times C \times H \times W) @f$
    *      the inputs @f$ x @f$; Backward fills their diff with
    *      gradients @f$
-   *        \frac{\partial E}{\partial x} = \left\{
-   *        \begin{array}{lr}
-   *            1           & \mathrm{if} \; x > 0 \\
-   *            y + \alpha  & \mathrm{if} \; x \le 0
-   *        \end{array} \right.
-   *      @f$ if propagate_down[0].
+   *        \frac{\partial E}{\partial x} =
+   *            \frac{\partial E}{\partial y} y \alpha \log_e(gamma)
+   *      @f$ if propagate_down[0]
    */
   virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
   virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
-};
 
+  Dtype base_scale_;
+  Dtype input_scale_, input_shift_;
+  Dtype backward_num_scale_;
+};
 
 }  // namespace caffe
 
-#endif  // CAFFE_ELU_LAYER_HPP_
+#endif  // CAFFE_LOG_LAYER_HPP_

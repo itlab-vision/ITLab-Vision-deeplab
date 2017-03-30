@@ -69,7 +69,7 @@ class SegAccuracyLayer : public Layer<Dtype> {
       if (propagate_down[i]) { NOT_IMPLEMENTED; }
     }
   }
-      
+
   ConfusionMatrix confusion_matrix_;
   bool has_ignore_label_;
   int ignore_label_;

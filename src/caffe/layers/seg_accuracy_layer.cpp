@@ -35,7 +35,7 @@ void SegAccuracyLayer<Dtype>::Reshape(
     << "The data should have the same height as label.";
   CHECK_EQ(bottom[0]->width(), bottom[1]->width())
     << "The data should have the same width as label.";
- 
+
   top[0]->Reshape(1, 1, 1, 3);
 }
 
@@ -54,7 +54,7 @@ void SegAccuracyLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   int top_k = 1;  // only support for top_k = 1
 
   // remove old predictions if exists
-  confusion_matrix_.clear();  
+  confusion_matrix_.clear();
 
   for (int i = 0; i < num; ++i) {
     for (int h = 0; h < height; ++h) {

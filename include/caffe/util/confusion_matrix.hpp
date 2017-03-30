@@ -12,9 +12,9 @@
  ******************************************************************************
  ** FILENAME:    drwnConfusionMatrix.h
  ** AUTHOR(S):   Stephen Gould <stephen.gould@anu.edu.au>
- ** 
+ **
  ****************************************************************************
-*/ 
+*/
 
 #ifndef CAFFE_UTIL_CONFUSION_MATRIX_HPP_
 #define CAFFE_UTIL_CONFUSION_MATRIX_HPP_
@@ -33,13 +33,13 @@ class ConfusionMatrix {
 
   void accumulate(const int actual, const int predicted);
   void accumulate(const ConfusionMatrix& conf);
- 
+
   int numRows() const;
   int numCols() const;
-  
+
   void resize(const int m);
   void clear();
-  
+
   void printCounts(const char *header = NULL) const;
   void printRowNormalized(const char *header = NULL) const;
   void printColNormalized(const char *header = NULL) const;
@@ -47,7 +47,7 @@ class ConfusionMatrix {
   void printPrecisionRecall(const char *header = NULL) const;
   void printF1Score(const char *header = NULL) const;
   void printJaccard(const char *header = NULL) const;
-  
+
   double rowSum(int n) const;
   double colSum(int m) const;
   double diagSum() const;
@@ -56,18 +56,18 @@ class ConfusionMatrix {
   double avgPrecision() const;
   double avgRecall(const bool strict = true) const;
   double avgJaccard() const;
- 
+
   double precision(int n) const;
   double recall(int n) const;
   double jaccard(int n) const;
- 
+
   const unsigned long& operator()(int x, int y) const;
   unsigned long& operator()(int x, int y);
 
  protected:
   // use unsigned long: be caureful of overflow for large-scale dataset
   std::vector< std::vector<unsigned long> > _matrix;
-  
+
  public:
   static std::string COL_SEP;   // string for separating columns when printing
   static std::string ROW_BEGIN; // string for starting a row when printing

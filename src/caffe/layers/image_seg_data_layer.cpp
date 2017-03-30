@@ -36,7 +36,7 @@ void ImageSegDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom
   string root_folder = this->layer_param_.image_data_param().root_folder();
 
   TransformationParameter transform_param = this->layer_param_.transform_param();
-  CHECK(transform_param.has_mean_file() == false) << 
+  CHECK(transform_param.has_mean_file() == false) <<
          "ImageSegDataLayer does not support mean file";
   CHECK((new_height == 0 && new_width == 0) ||
       (new_height > 0 && new_width > 0)) << "Current implementation requires "
@@ -83,15 +83,15 @@ void ImageSegDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom
   // Read an image, and use it to initialize the top blob.
   cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
                                     new_height, new_width, is_color);
-  
+
   CHECK(cv_img.data) << "Could not load " << lines_[lines_id_].first;
 
   const int batch_size = this->layer_param_.image_data_param().batch_size();
   CHECK_GT(batch_size, 0) << "Positive batch size required";
-  
+
   vector<int> top_shape = this->data_transformer_->InferBlobShape(cv_img);
   top_shape[0] = batch_size;
-  
+
   vector<int> top_data_shape = top_shape;
 
   vector<int> top_label_shape = top_shape;
@@ -112,11 +112,11 @@ void ImageSegDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bottom
 
   top[0]->Reshape(top_data_shape);
   this->transformed_data_.Reshape(top_data_shape);
-  
+
   top[1]->Reshape(top_label_shape);
   this->transformed_label_.Reshape(top_label_shape);
-  
-  
+
+
   top[2]->Reshape(top_data_dim_shape);
 
   LOG(INFO) << "output data size: " << top[0]->num() << ","
@@ -167,7 +167,7 @@ void ImageSegDataLayer<Dtype>::load_batch(SegmentationBatch<Dtype>* batch) {
   const string root_folder   = image_data_param.root_folder();
 
   Dtype* top_data = batch->data_.mutable_cpu_data();
-  Dtype* top_label = batch->label_.mutable_cpu_data(); 
+  Dtype* top_label = batch->label_.mutable_cpu_data();
   Dtype* top_data_dim = batch->dim_.mutable_cpu_data();
 
   vector<cv::Mat> cv_img_seg(2);
@@ -188,9 +188,9 @@ void ImageSegDataLayer<Dtype>::load_batch(SegmentationBatch<Dtype>* batch) {
       DLOG(INFO) << "Failed to load image: " << root_folder + lines_[lines_id_].first;
     }
 
-    top_data_dim[top_data_dim_offset + 0] = 
+    top_data_dim[top_data_dim_offset + 0] =
         static_cast<Dtype>(std::min(max_height, cv_img_seg.back().rows));
-    top_data_dim[top_data_dim_offset + 1] = 
+    top_data_dim[top_data_dim_offset + 1] =
         static_cast<Dtype>(std::min(max_width, cv_img_seg.back().cols));
 
     if (label_type == ImageDataParameter_LabelType_PIXEL) {
@@ -201,10 +201,10 @@ void ImageSegDataLayer<Dtype>::load_batch(SegmentationBatch<Dtype>* batch) {
       }
     } else if (label_type == ImageDataParameter_LabelType_IMAGE) {
       const int label = atoi(lines_[lines_id_].second.c_str());
-      cv_img_seg[1] = cv::Mat(cv_img_seg[0].rows, cv_img_seg[0].cols, 
-          CV_8UC1, cv::Scalar(label));      
+      cv_img_seg[1] = cv::Mat(cv_img_seg[0].rows, cv_img_seg[0].cols,
+          CV_8UC1, cv::Scalar(label));
     } else {
-      cv_img_seg[1] = cv::Mat(cv_img_seg[0].rows, cv_img_seg[0].cols, 
+      cv_img_seg[1] = cv::Mat(cv_img_seg[0].rows, cv_img_seg[0].cols,
           CV_8UC1, cv::Scalar(ignore_label));
     }
 
@@ -215,7 +215,7 @@ void ImageSegDataLayer<Dtype>::load_batch(SegmentationBatch<Dtype>* batch) {
     this->transformed_data_.set_cpu_data(top_data + top_data_offset);
     this->transformed_label_.set_cpu_data(top_label + top_label_offset);
 
-    this->data_transformer_->TransformImgAndSeg(cv_img_seg, 
+    this->data_transformer_->TransformImgAndSeg(cv_img_seg,
        &(this->transformed_data_), &(this->transformed_label_),
        ignore_label);
     trans_time += timer.MicroSeconds();

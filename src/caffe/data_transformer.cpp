@@ -329,7 +329,7 @@ void DataTransformer<Dtype>::Transform(const cv::Mat& cv_img,
 template<typename Dtype>
 void DataTransformer<Dtype>::TransformImgAndSeg(
     const std::vector<cv::Mat>& cv_img_seg,
-    Blob<Dtype>* transformed_data_blob, Blob<Dtype>* transformed_label_blob, 
+    Blob<Dtype>* transformed_data_blob, Blob<Dtype>* transformed_label_blob,
     const int ignore_label) {
   CHECK(cv_img_seg.size() == 2) << "Input must contain image and seg.";
 
@@ -387,12 +387,12 @@ void DataTransformer<Dtype>::TransformImgAndSeg(
       }
     }
   }
- 
+
   int h_off = 0;
   int w_off = 0;
-  cv::Mat cv_cropped_img = cv_img_seg[0];  
+  cv::Mat cv_cropped_img = cv_img_seg[0];
   cv::Mat cv_cropped_seg = cv_img_seg[1];
-  
+
   // transform to double, since we will pad mean pixel values
   cv_cropped_img.convertTo(cv_cropped_img, CV_64F);
 
@@ -401,11 +401,11 @@ void DataTransformer<Dtype>::TransformImgAndSeg(
   int pad_height = std::max(crop_size - img_height, 0);
   int pad_width  = std::max(crop_size - img_width, 0);
   if (pad_height > 0 || pad_width > 0) {
-    cv::copyMakeBorder(cv_cropped_img, cv_cropped_img, 0, pad_height, 
-          0, pad_width, cv::BORDER_CONSTANT, 
+    cv::copyMakeBorder(cv_cropped_img, cv_cropped_img, 0, pad_height,
+          0, pad_width, cv::BORDER_CONSTANT,
           cv::Scalar(mean_values_[0], mean_values_[1], mean_values_[2]));
-    cv::copyMakeBorder(cv_cropped_seg, cv_cropped_seg, 0, pad_height, 
-          0, pad_width, cv::BORDER_CONSTANT, 
+    cv::copyMakeBorder(cv_cropped_seg, cv_cropped_seg, 0, pad_height,
+          0, pad_width, cv::BORDER_CONSTANT,
            cv::Scalar(ignore_label));
     // update height/width
     img_height = cv_cropped_img.rows;
@@ -418,7 +418,7 @@ void DataTransformer<Dtype>::TransformImgAndSeg(
   // crop img/seg
   if (crop_size) {
     CHECK_EQ(crop_size, data_height);
-    CHECK_EQ(crop_size, data_width);    
+    CHECK_EQ(crop_size, data_width);
     // We only do random crop when we do training.
     if (phase_ == TRAIN) {
       h_off = Rand(img_height - crop_size + 1);
@@ -431,8 +431,8 @@ void DataTransformer<Dtype>::TransformImgAndSeg(
     cv::Rect roi(w_off, h_off, crop_size, crop_size);
     cv_cropped_img = cv_cropped_img(roi);
     cv_cropped_seg = cv_cropped_seg(roi);
-  } 
-  
+  }
+
   CHECK(cv_cropped_img.data);
   CHECK(cv_cropped_seg.data);
 
@@ -454,15 +454,15 @@ void DataTransformer<Dtype>::TransformImgAndSeg(
       // for image
       for (int c = 0; c < img_channels; ++c) {
         if (do_mirror) {
-          top_index = 
+          top_index =
               (c * data_height + h) * data_width + (data_width - 1 - w);
         } else {
-          top_index = 
+          top_index =
               (c * data_height + h) * data_width + w;
         }
         Dtype pixel = static_cast<Dtype>(data_ptr[data_index++]);
         if (has_mean_file) {
-          int mean_index = 
+          int mean_index =
               (c * img_height + h_off + h) * img_width + w_off + w;
           transformed_data[top_index] =
             (pixel - mean[mean_index]) * scale;
@@ -659,8 +659,8 @@ vector<int> DataTransformer<Dtype>::InferBlobShape(const cv::Mat& cv_img) {
   const int img_width = cv_img.cols;
   // Check dimensions.
   CHECK_GT(img_channels, 0);
-  CHECK_GE(img_height, crop_size);
-  CHECK_GE(img_width, crop_size);
+  CHECK_GE(img_height, 0);
+  CHECK_GE(img_width, 0);
   // Build BlobShape.
   vector<int> shape(4);
   shape[0] = 1;

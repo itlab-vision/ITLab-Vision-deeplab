@@ -556,7 +556,7 @@ void Blob<Dtype>::FromMat(const char* fname) {
   mat_t* matfp;
   matfp = Mat_Open(fname, MAT_ACC_RDONLY);
   CHECK(matfp) << "Error opening MAT file " << fname;
-  
+
   // Read data
   matvar_t *matvar;
   matvar = Mat_VarReadInfo(matfp,"data");
@@ -569,7 +569,7 @@ void Blob<Dtype>::FromMat(const char* fname) {
     (matvar->rank > 1) ? matvar->dims[1] : 1,
     (matvar->rank > 0) ? matvar->dims[0] : 0);
   Dtype* data = mutable_cpu_data();
-  int ret = Mat_VarReadDataLinear(matfp, matvar, data, 0, 1, count());   
+  int ret = Mat_VarReadDataLinear(matfp, matvar, data, 0, 1, count());
   CHECK(ret == 0) << "Error reading array 'data' from MAT file " << fname;
   Mat_VarFree(matvar);
 
@@ -579,7 +579,7 @@ void Blob<Dtype>::FromMat(const char* fname) {
     CHECK_EQ(matvar->class_type, matio_class_map<Dtype>())
       << "Field 'diff' must be of the right class (single/double) in MAT file " << fname;
     Dtype* diff = mutable_cpu_diff();
-    int ret = Mat_VarReadDataLinear(matfp, matvar, diff, 0, 1, count());   
+    int ret = Mat_VarReadDataLinear(matfp, matvar, diff, 0, 1, count());
     CHECK(ret == 0) << "Error reading array 'diff' from MAT file " << fname;
     Mat_VarFree(matvar);
   }
@@ -592,9 +592,9 @@ void Blob<Dtype>::ToMat(const char* fname, bool write_diff) {
   matfp = Mat_Create(fname, 0);
   CHECK(matfp) << "Error creating MAT file " << fname;
   size_t dims[4];
-  dims[0] = shape(3); 
-  dims[1] = shape(2); 
-  dims[2] = shape(1); 
+  dims[0] = shape(3);
+  dims[1] = shape(2);
+  dims[2] = shape(1);
   dims[3] = shape(0);
   matvar_t* matvar;
 
@@ -602,7 +602,7 @@ void Blob<Dtype>::ToMat(const char* fname, bool write_diff) {
   matvar = Mat_VarCreate("data", matio_class_map<Dtype>(), matio_type_map<Dtype>(),
       4, dims, mutable_cpu_data(), 0);
   CHECK(matvar) << "Error creating 'data' variable";
-  CHECK_EQ(Mat_VarWrite(matfp, matvar, MAT_COMPRESSION_NONE), 0) 
+  CHECK_EQ(Mat_VarWrite(matfp, matvar, MAT_COMPRESSION_NONE), 0)
     << "Error saving array 'data' into MAT file " << fname;
   Mat_VarFree(matvar);
 

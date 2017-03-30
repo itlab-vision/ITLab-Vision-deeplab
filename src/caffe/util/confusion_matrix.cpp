@@ -21,7 +21,7 @@ ConfusionMatrix::ConfusionMatrix(const int m) {
 
 ConfusionMatrix::~ConfusionMatrix() {}
 
-int ConfusionMatrix::numRows() const { 
+int ConfusionMatrix::numRows() const {
   return _matrix.size();
 }
 
@@ -52,7 +52,7 @@ void ConfusionMatrix::accumulate(const int actual, const int predicted) {
 
 void ConfusionMatrix::accumulate(const ConfusionMatrix& confusion) {
   CHECK(confusion._matrix.size() == _matrix.size());
-  
+
   if(_matrix.empty()) return;
 
   CHECK(confusion._matrix[0].size() == _matrix[0].size());
@@ -127,7 +127,7 @@ void ConfusionMatrix::printColNormalized(const char *header) const {
 
 void ConfusionMatrix::printNormalized(const char *header) const {
   double total = totalSum();
-  
+
   if (header == NULL) {
     LOG(INFO) << "--- confusion matrix: (actual, predicted) ---";
   } else {
@@ -156,7 +156,7 @@ void ConfusionMatrix::printPrecisionRecall(const char *header) const {
     if (i > 0) {
       LOG(INFO) << COL_SEP;
     }
-    double r = (_matrix[i].size() > i) ? 
+    double r = (_matrix[i].size() > i) ?
         (double)_matrix[i][i] / (double)rowSum(i) : 0.0;
     LOG(INFO) <<  r;
   }
@@ -168,7 +168,7 @@ void ConfusionMatrix::printPrecisionRecall(const char *header) const {
     if (i > 0) {
       LOG(INFO) << COL_SEP;
     }
-    double p = (_matrix[i].size() > i) ? 
+    double p = (_matrix[i].size() > i) ?
          (double)_matrix[i][i] / (double)colSum(i) : 1.0;
     LOG(INFO) << p;
   }
@@ -188,10 +188,10 @@ void ConfusionMatrix::printF1Score(const char *header) const {
       LOG(INFO) << COL_SEP;
     }
     // recall
-    double r = (_matrix[i].size() > i) ? 
+    double r = (_matrix[i].size() > i) ?
         (double)_matrix[i][i] / (double)rowSum(i) : 0.0;
     // precision
-    double p = (_matrix[i].size() > i) ? 
+    double p = (_matrix[i].size() > i) ?
         (double)_matrix[i][i] / (double)colSum(i) : 1.0;
     LOG(INFO) << ((2.0 * p * r) / (p + r));
   }
@@ -287,7 +287,7 @@ double ConfusionMatrix::avgRecall(const bool strict) const {
       }
     }
   }
-  
+
   if (strict && numClasses != (int)_matrix.size()) {
     LOG(FATAL) << "not all classes represented in avgRecall()";
   }
@@ -312,7 +312,7 @@ double ConfusionMatrix::avgJaccard() const {
       totalJaccard += intersectionSize / unionSize;
     }
   }
-  
+
   return totalJaccard / (double)_matrix.size();
 }
 

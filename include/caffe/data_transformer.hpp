@@ -78,7 +78,7 @@ class DataTransformer {
 
   /** Deeplab
    * @brief Applies the transformation defined in the data layer's
-   * transform_param block to a vector<cv::Mat> with image and label 
+   * transform_param block to a vector<cv::Mat> with image and label
    * simultaneously.
    *
    * @param cv_img_seg
@@ -93,7 +93,7 @@ class DataTransformer {
    *    Label index that ignored in ground thruth. Used as empty space filler.
    */
   void TransformImgAndSeg(const std::vector<cv::Mat>& cv_img_seg,
-                         Blob<Dtype>* transformed_data_blob, 
+                         Blob<Dtype>* transformed_data_blob,
                          Blob<Dtype>* transformed_label_blob,
                          const int ignore_label);
 #endif  // USE_OPENCV
